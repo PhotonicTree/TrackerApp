@@ -4,7 +4,7 @@ BackendController::BackendController(BackendWorker* backendWorker, QObject* pare
 {
 	backendWorker->moveToThread(&backendThread);
 	// Connect importing signal with BackendWorker's ImportSequenceAction
-	connect(this, &BackendController::startImporting, backendWorker, &BackendWorker::ImportSequenceAction);
+	connect(this, &BackendController::startImporting, backendWorker, &BackendWorker::ImportSequence);
 	connect(backendWorker, &BackendWorker::ImportingFinished, this, &BackendController::importingFinished);
 
 	backendThread.start();

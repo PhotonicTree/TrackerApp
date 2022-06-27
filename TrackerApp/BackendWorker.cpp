@@ -1,6 +1,6 @@
 #include "BackendWorker.h"
 
-Q_INVOKABLE void BackendWorker::ImportSequenceAction(const QString& path)
+Q_INVOKABLE void BackendWorker::ImportSequence(const QString& path)
 {
 	const auto sequencePath = path.toStdString();
 	cv::VideoCapture capture(sequencePath);
@@ -20,4 +20,9 @@ Q_INVOKABLE void BackendWorker::ImportSequenceAction(const QString& path)
         }
         sequence.push_back(frame);
     }
+}
+
+Q_INVOKABLE void BackendWorker::DisplaySequence(const QString& path)
+{
+    return Q_INVOKABLE void();
 }

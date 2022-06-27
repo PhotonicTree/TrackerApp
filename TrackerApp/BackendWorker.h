@@ -15,6 +15,8 @@ signals:
 	void ImportingFinished();
 
 public:
-	Q_INVOKABLE void ImportSequenceAction(const QString& path);
+	Q_INVOKABLE void ImportSequence(const QString& path);
+
+	Q_INVOKABLE void DisplaySequence(const QString& path);
 };
 

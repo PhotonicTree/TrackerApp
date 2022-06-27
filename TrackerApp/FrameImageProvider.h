@@ -3,34 +3,45 @@
 #include <QImage>
 #include <QQuickImageProvider>
 
+#include "Sequence.h"
 
-    class FrameImageProvider : public QObject, public QQuickImageProvider
-    {
-        Q_OBJECT
-    public:
+class FrameImageProvider : public QObject, public QQuickImageProvider, public SequenceView::Sink
+{
+    Q_OBJECT
+public:
 
-        //! FrameImageProvider constructor.
-        FrameImageProvider(QObject* parent = nullptr);
+    //! FrameImageProvider constructor.
+    FrameImageProvider(QObject* parent = nullptr);
 
-        //! Reimplements QQuickImageProvider::requestImage(const QString& id, QSize* size, const QSize& requestedSize)
-        QImage requestImage(const QString& id, QSize* size, const QSize& requestedSize) override;
+    //! Reimplements QQuickImageProvider::requestImage(const QString& id, QSize* size, const QSize& requestedSize)
+    QImage requestImage(const QString& id, QSize* size, const QSize& requestedSize) override;
 
-        /*! Method used to set frame index which is currently display.
-            \param[in] frameIndex Current frame index to set.
-        */
-        void SetCurrentFrameIndex(int frameIndex);
+    /*! Method used to set frame index which is currently display.
+        \param[in] frameIndex Current frame index to set.
+    */
+    void SetCurrentFrameIndex(int frameIndex);
 
-    public slots:
-        //! Method used to update image which is currently display.
-        void updateImage();
+    /*! Method used to get frame index which is currently display.
+        \returns Current frame index.
+    */
+    int GetCurrentFrameIndex() const;
 
-    signals:
-        //! Signal emitted when image to display has changed.
-        void imageChanged();
 
-    private:
-        QImage imageQML;                //!< QImage which is displaying.
-        int currentFrameIndex;          //!< Current frame index.
-    };
-// namespace SkiJumping::ImageProvider
+public slots:
+    //! Method used to update image which is currently display.
+    void updateImage();
+
+    /*! Method used to set frame to display.
+         \param[in] frameIndex Frame index to display.
+    */
+    void SetFrameImage(int frameIndex);
+
+signals:
+    //! Signal emitted when image to display has changed.
+    void imageChanged();
+
+private:
+    QImage imageQML;                //!< QImage which is displaying.
+    int currentFrameIndex;          //!< Current frame index.
+};
 

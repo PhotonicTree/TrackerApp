@@ -21,21 +21,32 @@ Window {
             RowLayout {
                 Layout.preferredHeight: 40
                 Layout.fillWidth: true
+
                 TextField {
                     id: path
                     enabled: false
                     Layout.fillWidth: true
                 }
+
                 Button {
                     text: "..."
                     onClicked: fileDialog.open();
                 }
             }
+
             Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 border.color: "black"
 
+
+                Image {
+                    id: firstPreviewViewerImage
+                    anchors {top: parent.top; fill: parent}
+                    visible: true
+                    source: "image://frameImageProvieder/image"
+                    cache: false
+                }
             }
         }
 
@@ -56,6 +67,9 @@ Window {
             Button {
                 Layout.alignment: Qt.AlignBottom | Qt.AlignRight
                 text: "Compute"
+                onClicked: {
+                    backendController.startImporting(path.text);
+                }
 
             }
         }
@@ -66,7 +80,6 @@ Window {
         currentFile: ""
         onFileChanged: {
             path.text = file;
-            backendController.startImporting(file);
         }
     }
 }

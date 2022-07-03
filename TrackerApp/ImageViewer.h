@@ -1,14 +1,16 @@
 #pragma once
 
 #include <opencv2/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
 #include <QObject>
+#include <QTimer>
+#include <QImage>
 
-//! ImageViewerLayer class forward declaration.
-class ImageViewerLayer;
 
 /*! \class ImageViewer
 	Widget class for displaying cv::Mat images with OpenGL.
 */
+
 class ImageViewer : public QObject
 {
 	Q_OBJECT
@@ -30,9 +32,19 @@ public:
 
 	//! Basic destructor.
 	~ImageViewer();
+public:
+	void streamVideo();
+
+public slots:
+	void openVideoCamera(QString path);
 
 	// QWidget events
 
 private:
 	cv::Mat image;												//!< Image to display.
+	cv::VideoCapture cap;
+	QTimer tUpdate;
+
+signals:
+	void newImage(QImage&);
 };

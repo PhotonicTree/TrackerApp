@@ -5,7 +5,7 @@
 
 #include "Sequence.h"
 
-class FrameImageProvider : public QObject, public QQuickImageProvider, public SequenceView::Sink
+class FrameImageProvider : public QObject, public QQuickImageProvider
 {
     Q_OBJECT
 public:
@@ -29,12 +29,12 @@ public:
 
 public slots:
     //! Method used to update image which is currently display.
-    void updateImage();
+    void updateImage(const QImage& image);
 
     /*! Method used to set frame to display.
          \param[in] frameIndex Frame index to display.
     */
-    void SetFrameImage(int frameIndex);
+    //void SetFrameImage(int frameIndex);
 
 signals:
     //! Signal emitted when image to display has changed.

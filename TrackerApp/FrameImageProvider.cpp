@@ -71,37 +71,37 @@ QImage FrameImageProvider::requestImage(const QString& id, QSize* size, const QS
 	return imageQML;
 }
 
-void FrameImageProvider::SetFrameImage(int frameIndex)
+//void FrameImageProvider::SetFrameImage(int frameIndex)
+//{
+//	auto sequenceLength = sequenceSource->GetSize();
+//	auto frameIndexToSet = frameIndex >= sequenceLength ? (sequenceLength - 1) : frameIndex < 0 ? 0 : frameIndex;
+//	std::shared_ptr<SequenceView::Frame> frame = sequenceSource->GetFrame(frameIndexToSet);
+//	auto frameImage = frame->GetImage();
+//	currentFrameIndex = frameIndexToSet;
+//	if (!frameImage.empty())
+//	{
+//		// We need 3 channels to draw colorful overlays
+//		if (frameImage.channels() != 3)
+//		{
+//			cv::cvtColor(frameImage, frameImage, cv::COLOR_GRAY2BGR);
+//		}
+//
+//		imageQML = CVMatToQImage(frameImage);
+//	}
+//	else
+//	{
+//		imageQML = QImage();
+//	}
+//	updateImage();
+//}
+
+void FrameImageProvider::updateImage(const QImage& image)
 {
-	auto sequenceLength = sequenceSource->GetSize();
-	auto frameIndexToSet = frameIndex >= sequenceLength ? (sequenceLength - 1) : frameIndex < 0 ? 0 : frameIndex;
-	std::shared_ptr<SequenceView::Frame> frame = sequenceSource->GetFrame(frameIndexToSet);
-	auto frameImage = frame->GetImage();
-	currentFrameIndex = frameIndexToSet;
-	if (!frameImage.empty())
+	if (image.isNull())
 	{
-		// We need 3 channels to draw colorful overlays
-		if (frameImage.channels() != 3)
-		{
-			cv::cvtColor(frameImage, frameImage, cv::COLOR_GRAY2BGR);
-		}
-
-		imageQML = CVMatToQImage(frameImage);
+		//image.load(":/Resources/Images/no_signal_image.jpg");
+		imageQML = image;
 	}
-	else
-	{
-		imageQML = QImage();
-	}
-	updateImage();
-}
-
-void FrameImageProvider::updateImage()
-{
-	if (imageQML.isNull())
-	{
-		imageQML.load(":/Resources/Images/no_signal_image.jpg");
-		imageQML = imageQML.scaled(1080, 1920);
-	}
-
+	imageQML = image;
 	emit imageChanged();
 }

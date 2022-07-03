@@ -41,11 +41,19 @@ Window {
 
 
                 Image {
-                    id: firstPreviewViewerImage
+                    id: image
                     anchors {top: parent.top; fill: parent}
+                    property bool counter: false
                     visible: true
-                    source: "image://frameImageProvieder/image"
+                    source: "image://frameProvider/image"
                     cache: false
+                    asynchronous: false 
+
+                    function reload()
+                    {
+                        counter = !counter
+                        source = "image://frameProvider/image?id=" + counter
+                    }
                 }
             }
         }
@@ -69,8 +77,19 @@ Window {
                 text: "Compute"
                 onClicked: {
                     backendController.startImporting(path.text);
+                    //imageViewer.openVideoCamera(path.text)
+                    //opencvImage.visible = true
                 }
 
+            }
+
+            Button {
+                Layout.alignment: Qt.AlignBottom | Qt.AlignRight
+                text: "Show"
+                onClicked: {
+                     imageViewer.openVideoCamera(path.text)
+                     image.visible = true
+                }
             }
         }
     }
@@ -81,5 +100,15 @@ Window {
         onFileChanged: {
             path.text = file;
         }
+    }
+
+        Connections{
+        target: frameImageProvider
+
+        function onImageChanged()
+        {
+            image.reload()
+        }
+
     }
 }

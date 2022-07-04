@@ -24,5 +24,9 @@ Q_INVOKABLE void BackendWorker::ImportSequence(const QString& path)
 
 Q_INVOKABLE void BackendWorker::DisplaySequence(const QString& path)
 {
+    for (const auto& frame : sequence)
+    {
+        cv::imshow("Frame", frame);
+    }
     return Q_INVOKABLE void();
 }

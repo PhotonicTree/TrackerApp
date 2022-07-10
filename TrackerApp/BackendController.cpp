@@ -7,6 +7,7 @@ BackendController::BackendController(BackendWorker* backendWorker, QObject* pare
 	connect(this, &BackendController::startImporting, backendWorker, &BackendWorker::ImportSequence);
 	connect(backendWorker, &BackendWorker::ImportingFinished, this, &BackendController::importingFinished);
 
+	connect(this, &BackendController::startDisplaying, backendWorker, &BackendWorker::DisplaySequence);
 	backendThread.start();
 }
 

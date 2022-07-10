@@ -3,9 +3,9 @@
 Q_INVOKABLE void BackendWorker::ImportSequence(const QString& path)
 {
 	const auto sequencePath = path.toStdString();
-	cv::VideoCapture capture(sequencePath);
+	videoCapture.open(sequencePath);
 
-    if (!capture.isOpened()) {
+    if (!videoCapture.isOpened()) {
         std::cout << "Error opening video stream or file" << std::endl;
         return;
     }
@@ -13,7 +13,7 @@ Q_INVOKABLE void BackendWorker::ImportSequence(const QString& path)
     cv::Mat frame;
     while (true)
     {
-        capture >> frame;
+        videoCapture >> frame;
         if (frame.empty())
         {
             break;
@@ -22,11 +22,14 @@ Q_INVOKABLE void BackendWorker::ImportSequence(const QString& path)
     }
 }
 
-Q_INVOKABLE void BackendWorker::DisplaySequence(const QString& path)
+Q_INVOKABLE void BackendWorker::DisplaySequence()
 {
-    for (const auto& frame : sequence)
-    {
-        cv::imshow("Frame", frame);
-    }
-    return Q_INVOKABLE void();
+    ImageViewer* imageViewer(new ImageViewer);
+
+    imageViewer->TriggerStreamingSequence(videoCapture);
+}
+
+Q_INVOKABLE cv::VideoCapture BackendWorker::GetCapture()
+{
+    return videoCapture;
 }

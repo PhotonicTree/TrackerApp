@@ -2,7 +2,11 @@
 
 #include <QObject>
 #include <opencv2/opencv.hpp>
+#include <opencv2/tracking/tracking.hpp>
 #include <iostream>
+
+#include "ImageViewer.h"
+
 
 class BackendWorker : public QObject
 {
@@ -10,6 +14,8 @@ class BackendWorker : public QObject
 
 private:
 	std::vector<cv::Mat> sequence;
+	cv::VideoCapture videoCapture;
+	//ImageViewer *imageViewer;
 
 signals:
 	void ImportingFinished();
@@ -17,6 +23,7 @@ signals:
 public:
 	Q_INVOKABLE void ImportSequence(const QString& path);
 
-	Q_INVOKABLE void DisplaySequence(const QString& path);
+	Q_INVOKABLE void DisplaySequence();
+	Q_INVOKABLE cv::VideoCapture GetCapture();
 };
 

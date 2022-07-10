@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <opencv2/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <QObject>
@@ -33,10 +34,13 @@ public:
 	//! Basic destructor.
 	~ImageViewer();
 public:
-	void streamVideo();
+	void StreamVideo();
 
 public slots:
-	void openVideoCamera(QString path);
+
+	void TriggerStreamingPreview(QString path);
+
+	void TriggerStreamingSequence(cv::VideoCapture capture);
 
 	// QWidget events
 

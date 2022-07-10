@@ -85,9 +85,18 @@ Window {
 
             Button {
                 Layout.alignment: Qt.AlignBottom | Qt.AlignRight
+                text: "Preview"
+                onClicked: {
+                     imageViewer.TriggerStreamingPreview(path.text)
+                     image.visible = true
+                }
+            }
+
+            Button {
+                Layout.alignment: Qt.AlignBottom | Qt.AlignRight
                 text: "Show"
                 onClicked: {
-                     imageViewer.openVideoCamera(path.text)
+                     backendController.startDisplaying();
                      image.visible = true
                 }
             }
@@ -101,8 +110,7 @@ Window {
             path.text = file;
         }
     }
-
-        Connections{
+        Connections {
         target: frameImageProvider
 
         function onImageChanged()

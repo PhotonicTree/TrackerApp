@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("backendController", &backendController);
     engine.rootContext()->setContextProperty("frameImageProvider", frameImageProvider);
     engine.rootContext()->setContextProperty("imageViewer", imageViewer);
+    engine.rootContext()->setContextProperty("backendWorker", backendWorker);
     engine.addImageProvider("frameProvider", frameImageProvider);
     
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));

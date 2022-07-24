@@ -113,4 +113,26 @@ cv::SimpleBlobDetector::Params InitializeSimpleBlobDetectorParmeters()
     return circleBlobDetectorParams;
 }
 
+void BackendWorker::DetectMarkersOnImage()
+{
+    auto firstFrame = sequence.front();
+    auto blobDetector = cv::SimpleBlobDetector::create(InitializeSimpleBlobDetectorParmeters());
+    std::vector<cv::KeyPoint> keypoints;
+    blobDetector->detect(firstFrame, keypoints);
+
+    for (size_t i = 0; i < keypoints.size(); i++)
+    {
+        cv::Point center(cvRound(keypoints[i].pt.x), cvRound(keypoints[i].pt.y));
+        int radius = 10;
+        // draw the circle center
+        cv::circle(firstFrame, center, 3, cv::Scalar(0, 255, 0), -1, 8, 0);
+        // draw the circle outline
+        circle(firstFrame, center, radius, cv::Scalar(0, 0, 255), 3, 8, 0);
+    }
+
+}
+
+void BackendWorker::RunTrackerCSRT()
+{
+
 }

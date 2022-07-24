@@ -20,6 +20,7 @@ Q_INVOKABLE void BackendWorker::ImportSequence(const QString& path)
         }
         sequence.push_back(frame);
     }
+    ImportingFinished();
 }
 
 Q_INVOKABLE void BackendWorker::DisplaySequence()

@@ -30,9 +30,14 @@ Q_INVOKABLE void BackendWorker::DisplaySequence()
     imageViewer->TriggerStreamingSequence(videoCapture);
 }
 
-Q_INVOKABLE cv::VideoCapture BackendWorker::GetCapture()
+Q_INVOKABLE void BackendWorker::GetFirstFrameROI()
 {
-    return videoCapture;
+    //auto firstFrame = sequence.back();
+    //ROI = cv::selectROI("tracker", firstFrame);
+    std::cout << "Roi selected";
+    DetectMarkersOnImage();
+}
+
 
 cv::SimpleBlobDetector::Params InitializeSimpleBlobDetectorParmeters()
 {

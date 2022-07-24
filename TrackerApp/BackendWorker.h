@@ -3,6 +3,9 @@
 #include <QObject>
 #include <opencv2/opencv.hpp>
 #include <opencv2/tracking/tracking.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/core_detect.hpp>
+
 #include <iostream>
 
 #include "ImageViewer.h"
@@ -24,6 +27,12 @@ public:
 	Q_INVOKABLE void ImportSequence(const QString& path);
 
 	Q_INVOKABLE void DisplaySequence();
-	Q_INVOKABLE cv::VideoCapture GetCapture();
+
+	Q_INVOKABLE void GetFirstFrameROI();
+	Q_INVOKABLE void RunAllTrackers();
+	void HoughCirclesTracker();
+	void DetectMarkersOnImage();
+	void RunTrackerCSRT();
 };
+
 

@@ -38,6 +38,11 @@ Q_INVOKABLE void BackendWorker::GetFirstFrameROI()
     DetectMarkersOnImage();
 }
 
+Q_INVOKABLE void BackendWorker::RunAllTrackers()
+{ 
+    
+}
+
 
 cv::SimpleBlobDetector::Params InitializeSimpleBlobDetectorParmeters()
 {

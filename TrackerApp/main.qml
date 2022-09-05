@@ -10,6 +10,7 @@ Window {
     visible: true
     width: 1260
     height: 720
+    property var switchesStatus: []
 
     RowLayout {
         anchors.fill: parent
@@ -21,6 +22,7 @@ Window {
             RowLayout {
                 Layout.preferredHeight: 40
                 Layout.fillWidth: true
+                Layout.minimumWidth: 800
 
                 TextField {
                     id: path
@@ -58,27 +60,58 @@ Window {
             }
         }
 
+        RowLayout {
+
         ColumnLayout {
             id: trackerSelectionColumnLayout
-            Layout.margins: 200
+            Layout.margins: 20
             Layout.fillHeight: true
+            Layout.alignment: Qt.AlignRight
             Switch {
-                id: trackerMOSSERadioButton
+                id: trackerMOSSESwitch
                 text: "MOSSE"
             }
 
             Switch {
-                id: trackerCSRTRadioButton
+                id: trackerCSRTSwitch
+                text: "CSRT"
+                checked: true
+            }
+            Switch {
+                id: trackerGOTURNSwitch
+                text: "GOTURN"
+            }
+            Switch {
+                id: trackerDaSiamRPNSwitch
+                text: "DaSiamRPN"
+            }
+            Switch {
+                id: trackerHoughCirclesSwitch
+                text: "HoughCircles"
+            }
+            Switch {
+                id: tracker1
                 text: "CSRT"
             }
+            Switch {
+                id: tracker2
+                text: "CSRT"
+            }
+            Switch {
+                id: tracker3
+                text: "CSRT"
+            }
+            }
 
+            ColumnLayout {
+                Layout.margins: 20
+                Layout.fillHeight: true
             Button {
                 Layout.alignment: Qt.AlignBottom | Qt.AlignRight
-                text: "Compute"
+                text: "Run Tracking For Selected Trackers"
                 onClicked: {
                     backendController.startImporting(path.text);
                 }
-
             }
 
             Button {
@@ -94,13 +127,15 @@ Window {
                 Layout.alignment: Qt.AlignBottom | Qt.AlignRight
                 text: "Show"
                 onClicked: {
-                     backendController.startDisplaying();
-                     image.visible = true
+                    // backendController.startDisplaying();
+                    // image.visible = true
+                    getAllSelectedTrackers();
                 }
             }
+
         }
     }
-
+    }
     FileDialog {
         id: fileDialog
         currentFile: ""
@@ -116,5 +151,26 @@ Window {
             image.reload()
         }
 
+    }
+
+        Connections {
+        target: backendController
+
+        function onImportingFinished()
+        {
+           backendWorker.RunAllTrackers();
+        }
+
+    }
+
+    function getAllSelectedTrackers()
+    {
+        for (let i = 0; i < trackerSelectionColumnLayout.children.length; i++)
+        {
+            console.log(trackerSelectionColumnLayout.children[i].checked);
+            switchesStatus.push(trackerSelectionColumnLayout.children[i].checked);
+            console.log(typeof(switchesStatus));
+        }
+        backendWorker.GetSelectedTrackers(switchesStatus);
     }
 }

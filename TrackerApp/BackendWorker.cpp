@@ -38,6 +38,14 @@ Q_INVOKABLE void BackendWorker::GetFirstFrameROI()
     std::cout << "Roi selected";
 }
 
+Q_INVOKABLE void BackendWorker::GetSelectedTrackers(std::vector<bool> selectedTrackersQML)
+{
+    for (auto i = 0; i < selectedTrackersQML.size(); ++i)
+    {
+        selectedTrackers.insert(std::make_pair(static_cast<BackendWorkerHelpers::TrackerType>(i), selectedTrackersQML[i]));
+    }
+}
+
 Q_INVOKABLE void BackendWorker::RunAllTrackers()
 { 
     

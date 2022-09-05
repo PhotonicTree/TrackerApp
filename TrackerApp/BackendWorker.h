@@ -3,13 +3,25 @@
 #include <QObject>
 #include <opencv2/opencv.hpp>
 #include <opencv2/tracking/tracking.hpp>
+#include <opencv2/tracking.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/core_detect.hpp>
-
+#include <opencv2/tracking/tracking_legacy.hpp>
 #include <iostream>
 
 #include "ImageViewer.h"
 
+ 
+namespace BackendWorkerHelpers
+{
+	enum class TrackerType
+	{
+		CSRT,
+		MOSSE,
+		GOTURN,
+		DaSiamRPN
+	};
+}
 
 class BackendWorker : public QObject
 {

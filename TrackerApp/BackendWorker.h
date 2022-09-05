@@ -23,16 +23,21 @@ private:
 signals:
 	void ImportingFinished();
 
-public:
+public slots:
 	Q_INVOKABLE void ImportSequence(const QString& path);
 
 	Q_INVOKABLE void DisplaySequence();
 
 	Q_INVOKABLE void GetFirstFrameROI();
+	Q_INVOKABLE void GetSelectedTrackers(std::vector<bool> selectedTrackersQML);
 	Q_INVOKABLE void RunAllTrackers();
+
+public:
 	void HoughCirclesTracker();
 	void DetectMarkersOnImage();
 	void RunTrackerCSRT();
+	void RunTrackerDaSiamRPN();
+	void RunTrackerGOTURN();
 };
 
 

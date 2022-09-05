@@ -3,7 +3,7 @@
 #include <QImage>
 #include <QQuickImageProvider>
 
-#include "Sequence.h"
+#include <opencv2/opencv.hpp>
 
 class FrameImageProvider : public QObject, public QQuickImageProvider
 {

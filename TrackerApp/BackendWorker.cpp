@@ -48,7 +48,24 @@ Q_INVOKABLE void BackendWorker::GetSelectedTrackers(std::vector<bool> selectedTr
 
 Q_INVOKABLE void BackendWorker::RunAllTrackers()
 { 
-    
+    for (const auto selectedTracker : selectedTrackers)
+    {
+        switch (selectedTracker.first) {
+        case BackendWorkerHelpers::TrackerType::CSRT: RunTrackerCSRT();
+            break;
+        /*case BackendWorkerHelpers::TrackerType::MOSSE: RunTrackerMOSSE();
+            break;*/
+        case BackendWorkerHelpers::TrackerType::DaSiamRPN: RunTrackerDaSiamRPN();
+            break;
+        case BackendWorkerHelpers::TrackerType::GOTURN: RunTrackerGOTURN();
+            break;
+        //case BackendWorkerHelpers::TrackerType::CSRT: RunTrackerCSRT();
+        //    break;
+        //case BackendWorkerHelpers::TrackerType::CSRT: RunTrackerCSRT();
+        //    break;
+        }
+    }
+    // RunTrackeDaSiamRPN();
 }
 
 void BackendWorker::HoughCirclesTracker()

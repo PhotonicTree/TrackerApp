@@ -10,9 +10,9 @@ Q_INVOKABLE void BackendWorker::ImportSequence(const QString& path)
         return;
     }
 
-    cv::Mat frame;
-    while (true)
+    while (videoCapture.isOpened())
     {
+        cv::Mat frame;
         videoCapture >> frame;
         if (frame.empty())
         {
@@ -20,6 +20,7 @@ Q_INVOKABLE void BackendWorker::ImportSequence(const QString& path)
         }
         sequence.push_back(frame);
     }
+    videoCapture.release();
     ImportingFinished();
 }
 
@@ -32,10 +33,9 @@ Q_INVOKABLE void BackendWorker::DisplaySequence()
 
 Q_INVOKABLE void BackendWorker::GetFirstFrameROI()
 {
-    //auto firstFrame = sequence.back();
-    //ROI = cv::selectROI("tracker", firstFrame);
+    auto& firstFrame = sequence.front();
+    ROI = cv::selectROI("tracker", firstFrame);
     std::cout << "Roi selected";
-    DetectMarkersOnImage();
 }
 
 Q_INVOKABLE void BackendWorker::RunAllTrackers()

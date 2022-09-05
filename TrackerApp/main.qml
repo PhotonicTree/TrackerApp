@@ -77,8 +77,6 @@ Window {
                 text: "Compute"
                 onClicked: {
                     backendController.startImporting(path.text);
-                    //imageViewer.openVideoCamera(path.text)
-                    //opencvImage.visible = true
                 }
 
             }

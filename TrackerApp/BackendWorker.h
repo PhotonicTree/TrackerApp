@@ -30,7 +30,8 @@ class BackendWorker : public QObject
 private:
 	std::vector<cv::Mat> sequence;
 	cv::VideoCapture videoCapture;
-	//ImageViewer *imageViewer;
+	cv::Rect ROI;
+	std::map<BackendWorkerHelpers::TrackerType, bool> selectedTrackers;
 
 signals:
 	void ImportingFinished();

@@ -11,46 +11,54 @@
 
 #include "ImageViewer.h"
 
+/*!	\file BackendController.h
+	This file contains BackendWorker class, which is responsible for the whole back-end operations.
+*/
  
 namespace BackendWorkerHelpers
 {
+	/*! \enum TrackerType
+		Enum class representing all types of available trackers.
+	*/
 	enum class TrackerType
 	{
-		CSRT,
 		MOSSE,
+		CSRT,	
 		GOTURN,
 		DaSiamRPN
 	};
 }
 
+/*! \class BackendWorker
+	Main class in TrackerApp for performing all back-end operations.
+*/
 class BackendWorker : public QObject
 {
 	Q_OBJECT
 
-private:
-	std::vector<cv::Mat> sequence;
-	cv::VideoCapture videoCapture;
-	cv::Rect ROI;
-	std::map<BackendWorkerHelpers::TrackerType, bool> selectedTrackers;
-
 signals:
+	//! Signal used to emit, when importing is finished.
 	void ImportingFinished();
 
 public slots:
 	Q_INVOKABLE void ImportSequence(const QString& path);
-
 	Q_INVOKABLE void DisplaySequence();
-
 	Q_INVOKABLE void GetFirstFrameROI();
 	Q_INVOKABLE void GetSelectedTrackers(std::vector<bool> selectedTrackersQML);
 	Q_INVOKABLE void RunAllTrackers();
 
-public:
+private:
 	void HoughCirclesTracker();
 	void DetectMarkersOnImage();
 	void RunTrackerCSRT();
 	void RunTrackerDaSiamRPN();
 	void RunTrackerGOTURN();
+	void RunTrackerMOSSE();
+
+	std::vector<cv::Mat> sequence;
+	cv::VideoCapture videoCapture;
+	cv::Rect ROI;
+	std::map<BackendWorkerHelpers::TrackerType, bool> selectedTrackers;
 };
 
 

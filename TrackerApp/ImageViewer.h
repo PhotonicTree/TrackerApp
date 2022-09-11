@@ -35,14 +35,10 @@ public:
 	~ImageViewer();
 public:
 	void StreamVideo();
-
-public slots:
-
-	void TriggerStreamingPreview(QString path);
-
 	void TriggerStreamingSequence(cv::VideoCapture capture);
 
-	// QWidget events
+public slots:
+	void TriggerStreamingPreview(QString path);
 
 private:
 	cv::Mat image;												//!< Image to display.

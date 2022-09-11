@@ -44,25 +44,30 @@ Q_INVOKABLE void BackendWorker::GetSelectedTrackers(std::vector<bool> selectedTr
     {
         selectedTrackers.insert(std::make_pair(static_cast<BackendWorkerHelpers::TrackerType>(i), selectedTrackersQML[i]));
     }
+    RunAllTrackers();
 }
 
 Q_INVOKABLE void BackendWorker::RunAllTrackers()
 { 
     for (const auto selectedTracker : selectedTrackers)
     {
-        switch (selectedTracker.first) {
-        case BackendWorkerHelpers::TrackerType::CSRT: RunTrackerCSRT();
-            break;
-        /*case BackendWorkerHelpers::TrackerType::MOSSE: RunTrackerMOSSE();
-            break;*/
-        case BackendWorkerHelpers::TrackerType::DaSiamRPN: RunTrackerDaSiamRPN();
-            break;
-        case BackendWorkerHelpers::TrackerType::GOTURN: RunTrackerGOTURN();
-            break;
-        //case BackendWorkerHelpers::TrackerType::CSRT: RunTrackerCSRT();
-        //    break;
-        //case BackendWorkerHelpers::TrackerType::CSRT: RunTrackerCSRT();
-        //    break;
+        // Check if current switch is pressed.
+        if (selectedTracker.second)
+        {
+            switch (selectedTracker.first) {
+            case BackendWorkerHelpers::TrackerType::CSRT: RunTrackerCSRT();
+                break;
+            case BackendWorkerHelpers::TrackerType::MOSSE: RunTrackerMOSSE();
+                break;
+            case BackendWorkerHelpers::TrackerType::DaSiamRPN: RunTrackerDaSiamRPN();
+                break;
+            case BackendWorkerHelpers::TrackerType::GOTURN: RunTrackerGOTURN();
+                break;
+                //case BackendWorkerHelpers::TrackerType::CSRT: RunTrackerCSRT();
+                //    break;
+                //case BackendWorkerHelpers::TrackerType::CSRT: RunTrackerCSRT();
+                //    break;
+            }
         }
     }
     // RunTrackeDaSiamRPN();
@@ -219,6 +224,31 @@ void BackendWorker::RunTrackerGOTURN()
             break;
         // update the tracking result
         tracker->update(frame, ROI);
+        // draw the tracked object
+        rectangle(frame, ROI, cv::Scalar(255, 0, 0), 2, 1);
+        // show image with the tracked object
+        imshow("tracker", frame);
+        //quit on ESC button
+        if (cv::waitKey(1) == 27)break;
+    }
+}
+
+void BackendWorker::RunTrackerMOSSE()
+{
+    GetFirstFrameROI();
+    auto tracker = cv::legacy::TrackerMOSSE::create();
+    // initialize the tracker
+
+    tracker->init(sequence.front(), ROI);
+    // perform the tracking process
+    printf("Start the tracking process, press ESC to quit.\n");
+    for (auto& frame : sequence) {
+        // stop the program if no more images
+        if (frame.rows == 0 || frame.cols == 0)
+            break;
+        // update the tracking result
+        auto ROI2d = static_cast<cv::Rect2d>(ROI);
+        tracker->update(frame, ROI2d);
         // draw the tracked object
         rectangle(frame, ROI, cv::Scalar(255, 0, 0), 2, 1);
         // show image with the tracked object

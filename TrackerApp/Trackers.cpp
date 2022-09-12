@@ -1,20 +1,12 @@
 #include "Trackers.h"
 
-//template <typename T> void RunOpenCVTrackerByType()
-//{
-//    std::vector<cv::Ptr<T>> trackingInstances;
-//    for (size_t i = 0; i < ROIs.size(); i++)
-//    {
-//        trackingInstances.push_back(T::create());
-//        objects.push_back(ROIs[i]);
-//    }
-//    this->add(trackingInstances, firstFrame, objects);
-//
-//    for (const auto& image : sequence)
-//    {
-//        this->update(image);
-//    }
-//}
+BaseTracker::BaseTracker()
+{
+}
+
+BaseTracker::~BaseTracker()
+{
+}
 
 void MultiTrackerMIL::RunTracking()
 {

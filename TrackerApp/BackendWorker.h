@@ -36,36 +36,41 @@ namespace BackendWorkerHelpers
 	};
 }
 
-/*! \class BackendWorker
-	Main class in TrackerApp for performing all back-end operations.
-*/
+/*Main class in TrackerApp for performing all back-end operations.*/
 class BackendWorker : public QObject
 {
 	Q_OBJECT
 
 signals:
-	//! Signal used to emit, when importing is finished.
+	//Signal used to emit, when importing is finished.
 	void ImportingFinished();
 
 public slots:
+
+	/*Method used to import sequence of images.
+		\param[in] path QString with path to the video.
+	*/
 	Q_INVOKABLE void ImportSequence(const QString& path);
+
+	/*Method used to display loaded sequence.*/
 	Q_INVOKABLE void DisplaySequence();
-	Q_INVOKABLE void GetFirstFrameROI();
+
+	/*Method used to get informations from GUI switches which tracker types are selected.
+		\param[in] selectedTrackersQML std::vector<bool> with states of each tracker types.
+	*/
 	Q_INVOKABLE void GetSelectedTrackers(std::vector<bool> selectedTrackersQML);
+
+	/*Method used to run all selected trackers.*/
 	Q_INVOKABLE void RunAllTrackers();
 
 private:
-	void HoughCirclesTracker();
-	void DetectMarkersOnImage();
-	void RunTrackerCSRT();
-	void RunTrackerDaSiamRPN();
-	void RunTrackerGOTURN();
-	void RunTrackerMOSSE();
+	/*Method used to allow user to select markers' ROIs.*/
+	void GetFirstFrameROIs();
 
-	std::vector<cv::Mat> sequence;
-	cv::VideoCapture videoCapture;
-	cv::Rect ROI;
-	std::map<BackendWorkerHelpers::TrackerType, bool> selectedTrackers;
+	std::vector<cv::Mat> sequence;		// Vector with sequence of images to be analyzed.
+	cv::VideoCapture videoCapture;		// VideoCapture loaded by user.
+	std::vector<cv::Rect> ROIs;			// Vector of cv::Rect with selected regions of interests by user.
+	std::map<BackendWorkerHelpers::TrackerType, bool> selectedTrackers;		// Map with tracker types as a key and them boolean state as value.
 };
 
 

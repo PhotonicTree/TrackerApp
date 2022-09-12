@@ -10,22 +10,29 @@
 #include <iostream>
 
 #include "ImageViewer.h"
+#include  "Trackers.h"
 
 /*!	\file BackendController.h
 	This file contains BackendWorker class, which is responsible for the whole back-end operations.
 */
  
+/*Namespace for placing all needed helpers in Backed Worker.*/
 namespace BackendWorkerHelpers
 {
-	/*! \enum TrackerType
-		Enum class representing all types of available trackers.
-	*/
+	/*Enum class representing all types of available trackers.*/
 	enum class TrackerType
 	{
 		MOSSE,
-		CSRT,	
+		CSRT,
 		GOTURN,
-		DaSiamRPN
+		DaSiamRPN,
+		MIL,
+		TLD,
+		Boosting,
+		KCF,
+		MedianFlow,
+		HoughCircles,
+		BlobDetector
 	};
 }
 

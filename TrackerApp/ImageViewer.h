@@ -17,7 +17,7 @@ class ImageViewer : public QObject
 	Q_OBJECT
 public:
 
-	//! \enum ImageOrientation Image orientation.
+	//enum ImageOrientation Image orientation.
 	enum class ImageOrientation : int
 	{
 		Normal = 0,							//!< Normal, no rotation.
@@ -26,12 +26,12 @@ public:
 		RotateLeft = 3						//!< Rotate Left, 90 degree counter clockwise.
 	};
 
-	/*! Basic constructor.
+	/*Basic constructor.
 		\param[in] parent QWidget parent.
 	*/
 	ImageViewer(QWidget* parent = nullptr);
 
-	//! Basic destructor.
+	//Basic destructor.
 	~ImageViewer();
 public:
 	void StreamVideo();
@@ -41,10 +41,11 @@ public slots:
 	void TriggerStreamingPreview(QString path);
 
 private:
-	cv::Mat image;												//!< Image to display.
-	cv::VideoCapture cap;
-	QTimer tUpdate;
+	cv::Mat image;					//Image to display.
+	cv::VideoCapture videoCapture;	//Loaded video capture.
+	QTimer timeUpdate;				//QTimer timeUpdate for handling proper FPS rate.
 
 signals:
+	/*Signal newImage for emitting while streaming video.*/
 	void newImage(QImage&);
 };

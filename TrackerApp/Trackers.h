@@ -50,6 +50,23 @@ public:
 	std::vector<cv::Rect> ROIs;
 	cv::Mat firstFrame;
 	std::vector<cv::Mat> sequence;
+
+class MultiBlobDetectorTracker : public BaseTracker
+{
+public:
+	/*Method used to initialize the tracker.
+		\param[in] boundingBoxes std::vector<cv::Rect> with selected bounding boxes.
+		\param[in] images std::vector<cv::Mat> with loaded sequence of images.
+		\param[in] radius int value of circle to be drawn around found marker.
+	*/
+	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, int radius = 10);
+
+	/*Method used to run tracking of markers on given sequence and ROIs.*/
+	virtual void RunTracking();
+
+private:
+	cv::SimpleBlobDetector::Params circleBlobDetectorParams;
+	int circleRadius;
 };
 
 class MultiTrackerMIL : public BaseTracker

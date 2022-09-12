@@ -219,3 +219,64 @@ void MultiTrackerMedianFlow::RunTracking()
         this->update(image);
     }
 }
+
+void MultiBlobDetectorTracker::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, int radius)
+{
+    this->ROIs = boundingBoxes;
+    this->sequence = images;
+    this->circleRadius = radius;
+
+    // The following parameters are described here:
+    // https://docs.opencv.org/4.5.1/d0/d7a/classcv_1_1SimpleBlobDetector.html
+
+    // Filter by intensity (thresholding)
+    circleBlobDetectorParams.thresholdStep = 30;
+    circleBlobDetectorParams.minThreshold = 50;
+    circleBlobDetectorParams.maxThreshold = 231;
+    circleBlobDetectorParams.minRepeatability = 2;
+    circleBlobDetectorParams.minDistBetweenBlobs = 20;
+
+    // Filter by color
+    circleBlobDetectorParams.filterByColor = true;
+    circleBlobDetectorParams.blobColor = 0;
+
+    // Filter by area
+    circleBlobDetectorParams.filterByArea = true;
+    circleBlobDetectorParams.minArea = 80;
+    circleBlobDetectorParams.maxArea = 1200;
+
+    // Filter by circularity
+    circleBlobDetectorParams.filterByCircularity = true;
+    circleBlobDetectorParams.minCircularity = 0.40F;
+    circleBlobDetectorParams.maxCircularity = 0.94F;
+
+    // Filter by convexity
+    circleBlobDetectorParams.filterByConvexity = true;
+    circleBlobDetectorParams.minConvexity = 0.93F;
+    circleBlobDetectorParams.maxConvexity = 1.01F;
+
+    // Filter by inertia
+    // https://stackoverflow.com/questions/14770756/opencv-simpleblobdetector-filterbyinertia-meaning
+    circleBlobDetectorParams.filterByInertia = true;
+    circleBlobDetectorParams.minInertiaRatio = 0.25F;
+    circleBlobDetectorParams.maxInertiaRatio = 1.01F;
+}
+
+void MultiBlobDetectorTracker::RunTracking()
+{
+    auto blobDetector = cv::SimpleBlobDetector::create(circleBlobDetectorParams);
+    std::vector<std::vector<cv::KeyPoint>> keypoints;
+    for (auto i = 0; i < sequence.size(); ++i)
+    {
+        blobDetector->detect(sequence[i], keypoints[i]);
+
+        for (size_t j = 0; j < keypoints.size(); j++)
+        {
+            cv::Point center(cvRound(keypoints[i][j].pt.x), cvRound(keypoints[i][j].pt.y));
+            // draw the circle center
+            cv::circle(sequence[i], center, 3, cv::Scalar(0, 255, 0), -1, 8, 0);
+            // draw the circle outline
+            circle(sequence[i], center, circleRadius, cv::Scalar(0, 0, 255), 3, 8, 0);
+        }
+    }
+}

@@ -220,6 +220,40 @@ void MultiTrackerMedianFlow::RunTracking()
     }
 }
 
+void MultiHoughCirclesTracker::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)
+{
+    this->ROIs = boundingBoxes;
+    this->sequence = images;
+}
+
+void MultiHoughCirclesTracker::RunTracking()
+{
+    for (const auto& frame : sequence)
+    {
+        for (const auto& ROI : ROIs)
+        {
+            std::vector<cv::Vec3f> circles;
+            cv::Mat grayImage;
+            auto ROIImage = frame(ROI);
+            cv::cvtColor(ROIImage, grayImage, cv::COLOR_BGR2GRAY);
+            cv::medianBlur(grayImage, grayImage, 5);
+            cv::HoughCircles(grayImage, circles, cv::HOUGH_GRADIENT, 1, grayImage.rows / 16, 140, 10, 1, 10);
+
+            for (size_t i = 0; i < circles.size(); i++)
+            {
+                cv::Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
+                int radius = cvRound(circles[i][2]);
+                // draw the circle center
+                cv::circle(ROIImage, center, 3, cv::Scalar(0, 255, 0), -1, 8, 0);
+                // draw the circle outline
+                circle(ROIImage, center, radius, cv::Scalar(0, 0, 255), 3, 8, 0);
+            }
+            cv::namedWindow("circles", 1);
+            cv::imshow("circles", ROIImage);
+        }
+    }
+}
+
 void MultiBlobDetectorTracker::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, int radius)
 {
     this->ROIs = boundingBoxes;

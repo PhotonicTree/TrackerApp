@@ -76,10 +76,16 @@ public:
 	virtual void RunTracking();
 };
 
-class MultiTrackerMOSSE : public BaseTracker
+class MultiHoughCirclesTracker : public BaseTracker
 {
 public:
-	void InitializeTracker(cv::Mat& image, std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images);
+	/*Method used to initialize the tracker.
+		\param[in] boundingBoxes std::vector<cv::Rect> with selected bounding boxes.
+		\param[in] images std::vector<cv::Mat> with loaded sequence of images.
+	*/
+	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images);
+
+	/*Method used to run tracking of markers on given sequence and ROIs.*/
 	virtual void RunTracking();
 };
 

@@ -80,18 +80,6 @@ Window {
                 }
                 
                 Switch {
-                    id: trackerGOTURNSwitch
-                    text: "GOTURN"
-                    enabled: false
-                }
-                
-                Switch {
-                    id: trackerDaSiamRPNSwitch
-                    text: "DaSiamRPN"
-                    enabled: false
-                }
-                
-                Switch {
                     id: trackerMILSwitch
                     text: "MIL"
                 }
@@ -114,7 +102,29 @@ Window {
                 Switch {
                     id: trackerMedianFlowSwitch
                     text: "MedianFlow"
-                }   
+                }
+                
+                Switch {
+                    id: trackerHoughCirclesSwitch
+                    text: "HoughCircles"
+                }
+
+                Switch {
+                    id: trackerBlobDetectorSwitch
+                    text: "SimpleBlobDetector"
+                }
+
+                 Switch {
+                    id: trackerGOTURNSwitch
+                    text: "GOTURN"
+                    enabled: false
+                }
+                
+                Switch {
+                    id: trackerDaSiamRPNSwitch
+                    text: "DaSiamRPN"
+                    enabled: false
+                }
             }
 
             ColumnLayout {

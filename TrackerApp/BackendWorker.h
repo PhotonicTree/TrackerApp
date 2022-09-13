@@ -24,15 +24,15 @@ namespace BackendWorkerHelpers
 	{
 		MOSSE,
 		CSRT,
-		GOTURN,
-		DaSiamRPN,
 		MIL,
 		TLD,
 		Boosting,
 		KCF,
 		MedianFlow,
 		HoughCircles,
-		BlobDetector
+		BlobDetector,
+		GOTURN,
+		DaSiamRPN
 	};
 }
 

@@ -18,7 +18,6 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
 
-    // set context for backendController
     BackendWorker* backendWorker(new BackendWorker);
     FrameImageProvider* frameImageProvider(new FrameImageProvider);
     auto backendController = BackendController(backendWorker);

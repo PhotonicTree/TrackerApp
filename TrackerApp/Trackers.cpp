@@ -209,14 +209,14 @@ void MultiBlobDetectorTracker::InitializeTracker(std::vector<cv::Rect>& bounding
 void MultiBlobDetectorTracker::RunTracking()
 {
     auto blobDetector = cv::SimpleBlobDetector::create(circleBlobDetectorParams);
-    std::vector<std::vector<cv::KeyPoint>> keypoints;
+    std::vector<std::vector<cv::KeyPoint>> keypoints(100);
     for (auto i = 0; i < sequence.size(); ++i)
     {
-        blobDetector->detect(sequence[i], keypoints[i]);
+        blobDetector->detect(sequence.at(i), keypoints.at(i));
 
-        for (size_t j = 0; j < keypoints.size(); j++)
+        for (size_t j = 0; j < keypoints.at(i).size(); ++j)
         {
-            cv::Point center(cvRound(keypoints[i][j].pt.x), cvRound(keypoints[i][j].pt.y));
+            cv::Point center(cvRound(keypoints.at(i).at(j).pt.x), cvRound(keypoints.at(i).at(j).pt.y));
             // draw the circle center
             cv::circle(sequence[i], center, 3, cv::Scalar(0, 255, 0), -1, 8, 0);
             // draw the circle outline

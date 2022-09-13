@@ -141,9 +141,10 @@ void MultiHoughCirclesTracker::RunTracking()
     {
         for (const auto& ROI : ROIs)
         {
+            cv::Mat3b frame3b = frame.clone();
             std::vector<cv::Vec3f> circles;
             cv::Mat grayImage;
-            auto ROIImage = frame(ROI);
+            auto ROIImage = frame3b(ROI);
             cv::cvtColor(ROIImage, grayImage, cv::COLOR_BGR2GRAY);
             cv::medianBlur(grayImage, grayImage, 5);
             cv::HoughCircles(grayImage, circles, cv::HOUGH_GRADIENT, 1, grayImage.rows / 16, 140, 10, 1, 10);
@@ -157,8 +158,8 @@ void MultiHoughCirclesTracker::RunTracking()
                 // draw the circle outline
                 circle(ROIImage, center, radius, cv::Scalar(0, 0, 255), 3, 8, 0);
             }
-            cv::namedWindow("circles", 1);
-            cv::imshow("circles", ROIImage);
+            cv::imshow("HoughCircles Result", frame3b);
+            if (cv::waitKey(100) == 27) break;
         }
     }
 }

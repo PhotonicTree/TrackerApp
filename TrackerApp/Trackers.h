@@ -17,7 +17,8 @@ public:
 
 	/*Pure virtual function dedicated to inheriting classes for performing tracking.*/
 	virtual void RunTracking() = 0;
-
+	
+protected:
 	std::vector<cv::Rect> ROIs;			//Vector of cv::Rect with selected regions of interests by user.
 	std::vector<cv::Mat> sequence;		//Vector with sequence of images to be analyze.
 };
@@ -40,7 +41,7 @@ private:
 	int circleRadius;
 };
 
-class MultiTrackerMIL : public BaseTracker, public cv::legacy::MultiTracker
+class MultiTrackerMIL : public BaseTracker
 {
 public:
 	/*Method used to initialize the tracker.
@@ -66,7 +67,7 @@ public:
 	virtual void RunTracking();
 };
 
-class MultiTrackerMOSSE : public BaseTracker, public cv::legacy::MultiTracker
+class MultiTrackerMOSSE : public BaseTracker
 {
 public:
 	/*Method used to initialize the tracker.
@@ -79,7 +80,7 @@ public:
 	virtual void RunTracking();
 };
 
-class MultiTrackerCSRT : public BaseTracker, public cv::legacy::MultiTracker
+class MultiTrackerCSRT : public BaseTracker
 {
 public:
 	/*Method used to initialize the tracker.
@@ -92,7 +93,7 @@ public:
 	virtual void RunTracking();
 };
 
-class MultiTrackerGOTURN : public BaseTracker, public cv::legacy::MultiTracker
+class MultiTrackerGOTURN : public BaseTracker
 {
 public:
 	/*Method used to initialize the tracker.
@@ -105,7 +106,7 @@ public:
 	virtual void RunTracking();
 };
 
-class MultiTrackerDaSiamRPN : public BaseTracker, public cv::legacy::MultiTracker
+class MultiTrackerDaSiamRPN : public BaseTracker
 {
 public:
 	/*Method used to initialize the tracker.
@@ -118,7 +119,7 @@ public:
 	virtual void RunTracking();
 };
 
-class MultiTrackerTLD : public BaseTracker, public cv::legacy::MultiTracker
+class MultiTrackerTLD : public BaseTracker
 {
 public:
 	/*Method used to initialize the tracker.
@@ -131,7 +132,7 @@ public:
 	virtual void RunTracking();
 };
 
-class MultiTrackerBoosting : public BaseTracker, public cv::legacy::MultiTracker
+class MultiTrackerBoosting : public BaseTracker
 {
 public:
 	/*Method used to initialize the tracker.
@@ -144,7 +145,7 @@ public:
 	virtual void RunTracking();
 };
 
-class MultiTrackerKCF : public BaseTracker, public cv::legacy::MultiTracker
+class MultiTrackerKCF : public BaseTracker
 {
 public:
 	/*Method used to initialize the tracker.
@@ -157,7 +158,7 @@ public:
 	virtual void RunTracking();
 };
 
-class MultiTrackerMedianFlow : public BaseTracker, public cv::legacy::MultiTracker
+class MultiTrackerMedianFlow : public BaseTracker
 {
 public:
 	/*Method used to initialize the tracker.

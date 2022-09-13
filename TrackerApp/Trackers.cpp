@@ -8,20 +8,31 @@ BaseTracker::~BaseTracker()
 {
 }
 
+template <typename T> void RunTrackingForOpenCVLegacyTracker(std::vector<cv::Rect> ROIs, std::vector<cv::Mat> sequence)
+{
+    auto multiTracker = cv::legacy::MultiTracker::create();
+    for (const auto ROI : ROIs)
+    {
+        multiTracker->add(T::create(), sequence.front(), ROI);
+    }
+
+    for (size_t i = 1; i < sequence.size(); i++)
+    {
+        auto image = sequence.at(i);
+        multiTracker->update(image);
+        auto& trackerObjects = multiTracker->getObjects();
+        for (size_t i = 0; i < trackerObjects.size(); i++)
+        {
+            cv::rectangle(image, trackerObjects[i], cv::Scalar(255, 0, 0), 2, 1);
+        }
+        cv::imshow("Tracker result. Press 'x' to quit", image);
+        if (cv::waitKey(100) == 27) break;
+    }
+}
+
 void MultiTrackerMIL::RunTracking()
 {
-    std::vector<cv::Ptr<cv::legacy::Tracker>> trackingInstances;
-    for (size_t i = 0; i < ROIs.size(); i++)
-    {
-        trackingInstances.push_back(cv::legacy::TrackerMIL::create());
-        objects.push_back(ROIs[i]);
-    }
-    this->add(trackingInstances, sequence.front(), objects);
-
-    for (const auto& image : sequence)
-    {
-        this->update(image);
-    }
+    RunTrackingForOpenCVLegacyTracker<cv::legacy::TrackerMIL>(ROIs, sequence);
 }
 
 void MultiTrackerMIL::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)
@@ -38,20 +49,7 @@ void MultiTrackerMOSSE::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, 
 
 void MultiTrackerMOSSE::RunTracking()
 {
-    //RunOpenCVTrackerByType<cv::legacy::tracking::TrackerMOSSE>();
-
-    std::vector<cv::Ptr<cv::legacy::Tracker>> trackingInstances;
-    for (size_t i = 0; i < ROIs.size(); i++)
-    {
-        trackingInstances.push_back(cv::legacy::TrackerMOSSE::create());
-        objects.push_back(ROIs[i]);
-    }
-    this->add(trackingInstances, sequence.front(), objects);
-
-    for (const auto& image : sequence)
-    {
-        this->update(image);
-    }
+    RunTrackingForOpenCVLegacyTracker<cv::legacy::TrackerMOSSE>(ROIs, sequence);
 }
 
 void MultiTrackerCSRT::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)
@@ -62,26 +60,7 @@ void MultiTrackerCSRT::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, s
 
 void MultiTrackerCSRT::RunTracking()
 {
-   // RunOpenCVTrackerByType<cv::tracking::TrackerCSRT>();
-
-    std::vector<cv::Ptr<cv::legacy::Tracker>> trackingInstances;
-    for (size_t i = 0; i < ROIs.size(); i++)
-    {
-        trackingInstances.push_back(cv::legacy::TrackerCSRT::create());
-        objects.push_back(ROIs[i]);
-    }
-    this->add(trackingInstances, sequence.front(), objects);
-
-    for (const auto& image : sequence)
-    {
-        this->update(image);
-
-        for (auto i = 0; i < this->getObjects().size(); i++)
-        {
-            cv::rectangle(image, this->getObjects()[i], cv::Scalar(255, 0, 0), 2, 1);
-        }
-        cv::imshow("tracker", image);
-    }
+    RunTrackingForOpenCVLegacyTracker<cv::legacy::TrackerCSRT>(ROIs, sequence);
 }
 
 void MultiTrackerGOTURN::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)
@@ -92,20 +71,7 @@ void MultiTrackerGOTURN::InitializeTracker(std::vector<cv::Rect>& boundingBoxes,
 
 void MultiTrackerGOTURN::RunTracking()
 {
-//    // RunOpenCVTrackerByType<cv::TrackerGOTURN>();
-//
-//    std::vector<cv::Ptr<cv::legacy::Tracker>> trackingInstances;
-//    for (size_t i = 0; i < ROIs.size(); i++)
-//    {
-//        trackingInstances.push_back(cv::TrackerGOTURN::create());
-//        objects.push_back(ROIs[i]);
-//    }
-//    this->add(trackingInstances, sequence.front(), objects);
-//
-//    for (const auto& image : sequence)
-//    {
-//        this->update(image);
-//    }
+//    RunTrackingForOpenCVLegacyTracker
 }
 
 void MultiTrackerDaSiamRPN::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)
@@ -116,20 +82,7 @@ void MultiTrackerDaSiamRPN::InitializeTracker(std::vector<cv::Rect>& boundingBox
 
 void MultiTrackerDaSiamRPN::RunTracking()
 {
-//    //RunOpenCVTrackerByType<cv::TrackerDaSiamRPN>();
-//    
-//    std::vector<cv::Ptr<cv::legacy::Tracker>> trackingInstances;
-//    for (size_t i = 0; i < ROIs.size(); i++)
-//    {
-//        trackingInstances.push_back(cv::TrackerDaSiamRPN::create());
-//        objects.push_back(ROIs[i]);
-//    }
-//    this->add(trackingInstances, sequence.front(), objects);
-//
-//    for (const auto& image : sequence)
-//    {
-//        this->update(image);
-//    }
+//   RunTrackingForOpenCVLegacyTracker<cv::legacy::TrackerMIL>(ROIs, sequence);
 }
 
 void MultiTrackerTLD::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)
@@ -140,18 +93,7 @@ void MultiTrackerTLD::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, st
 
 void MultiTrackerTLD::RunTracking()
 {
-    std::vector<cv::Ptr<cv::legacy::Tracker>> trackingInstances;
-    for (size_t i = 0; i < ROIs.size(); i++)
-    {
-        trackingInstances.push_back(cv::legacy::TrackerTLD::create());
-        objects.push_back(ROIs[i]);
-    }
-    this->add(trackingInstances, sequence.front(), objects);
-
-    for (const auto& image : sequence)
-    {
-        this->update(image);
-    }
+    RunTrackingForOpenCVLegacyTracker<cv::legacy::TrackerTLD>(ROIs, sequence);
 }
 
 void MultiTrackerBoosting::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)
@@ -162,18 +104,7 @@ void MultiTrackerBoosting::InitializeTracker(std::vector<cv::Rect>& boundingBoxe
 
 void MultiTrackerBoosting::RunTracking()
 {
-    std::vector<cv::Ptr<cv::legacy::Tracker>> trackingInstances;
-    for (size_t i = 0; i < ROIs.size(); i++)
-    {
-        trackingInstances.push_back(cv::legacy::TrackerBoosting::create());
-        objects.push_back(ROIs[i]);
-    }
-    this->add(trackingInstances, sequence.front(), objects);
-
-    for (const auto& image : sequence)
-    {
-        this->update(image);
-    }
+    RunTrackingForOpenCVLegacyTracker<cv::legacy::TrackerBoosting>(ROIs, sequence);
 }
 
 void MultiTrackerKCF::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)
@@ -184,18 +115,7 @@ void MultiTrackerKCF::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, st
 
 void MultiTrackerKCF::RunTracking()
 {
-    std::vector<cv::Ptr<cv::legacy::Tracker>> trackingInstances;
-    for (size_t i = 0; i < ROIs.size(); i++)
-    {
-        trackingInstances.push_back(cv::legacy::TrackerKCF::create());
-        objects.push_back(ROIs[i]);
-    }
-    this->add(trackingInstances, sequence.front(), objects);
-
-    for (const auto& image : sequence)
-    {
-        this->update(image);
-    }
+    RunTrackingForOpenCVLegacyTracker<cv::legacy::TrackerKCF>(ROIs, sequence);
 }
 
 void MultiTrackerMedianFlow::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)
@@ -206,18 +126,7 @@ void MultiTrackerMedianFlow::InitializeTracker(std::vector<cv::Rect>& boundingBo
 
 void MultiTrackerMedianFlow::RunTracking()
 {
-    std::vector<cv::Ptr<cv::legacy::Tracker>> trackingInstances;
-    for (size_t i = 0; i < ROIs.size(); i++)
-    {
-        trackingInstances.push_back(cv::legacy::TrackerMedianFlow::create());
-        objects.push_back(ROIs[i]);
-    }
-    this->add(trackingInstances, sequence.front(), objects);
-
-    for (const auto& image : sequence)
-    {
-        this->update(image);
-    }
+    RunTrackingForOpenCVLegacyTracker<cv::legacy::TrackerMedianFlow>(ROIs, sequence);
 }
 
 void MultiHoughCirclesTracker::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)

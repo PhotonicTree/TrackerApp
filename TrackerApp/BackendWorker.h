@@ -43,7 +43,10 @@ class BackendWorker : public QObject
 
 signals:
 	//Signal used to emit, when importing is finished.
-	void ImportingFinished();
+	void importingFinished();
+
+	//Signal used to emit, when importing is finished.
+	void importingFailed();
 
 public slots:
 

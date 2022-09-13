@@ -29,6 +29,9 @@ signals:
 	//Signal emitted when sequence import is finished.
 	void importingFinished();
 
+	//Signal emitted when sequence import failed.
+	void importingFailed();
+
 private:
 	BackendWorker* backendWorker; //!< A pointer to Backend Worker, which is created in main file and do all the backend methods.
 	QThread backendThread;		  //!< QThread for heavy operations, which runs simultaneously and is called from QML by connections.

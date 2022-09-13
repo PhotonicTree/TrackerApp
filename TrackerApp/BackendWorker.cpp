@@ -7,6 +7,7 @@ Q_INVOKABLE void BackendWorker::ImportSequence(const QString& path)
 
     if (!videoCapture.isOpened()) {
         std::cout << "Error opening video stream or file!" << std::endl;
+        emit importingFailed();
         return;
     }
 
@@ -21,7 +22,7 @@ Q_INVOKABLE void BackendWorker::ImportSequence(const QString& path)
         sequence.push_back(frame);
     }
     videoCapture.release();
-    ImportingFinished();
+    emit importingFinished();
 }
 
 Q_INVOKABLE void BackendWorker::DisplaySequence()

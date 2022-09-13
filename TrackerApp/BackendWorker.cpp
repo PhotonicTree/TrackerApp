@@ -34,8 +34,8 @@ Q_INVOKABLE void BackendWorker::DisplaySequence()
 
 Q_INVOKABLE void BackendWorker::GetFirstFrameROIs()
 {
-    auto& firstFrame = sequence.front();
-    cv::selectROIs("tracker", firstFrame, ROIs);
+    auto firstFrame = sequence.front();
+    cv::selectROIs("Select ROI, press Enter and select next. Press ESC to finish selection", firstFrame, ROIs);
     std::cout << "Roi selected";
 }
 
@@ -48,7 +48,7 @@ Q_INVOKABLE void BackendWorker::GetSelectedTrackers(std::vector<bool> selectedTr
 }
 
 Q_INVOKABLE void BackendWorker::RunAllTrackers()
-{ 
+{
     GetFirstFrameROIs();
     for (const auto selectedTracker : selectedTrackers)
     {

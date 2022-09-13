@@ -61,61 +61,61 @@ Q_INVOKABLE void BackendWorker::RunAllTrackers()
                 tracker->InitializeTracker(ROIs, sequence);
                 tracker->RunTracking();
             }
-                break;
+                                                        break;
             case BackendWorkerHelpers::TrackerType::MOSSE: {
                 MultiTrackerMOSSE* tracker(new MultiTrackerMOSSE);
                 tracker->InitializeTracker(ROIs, sequence);
                 tracker->RunTracking();
             }
-                break;
+                                                         break;
             /*case BackendWorkerHelpers::TrackerType::DaSiamRPN: {
                 MultiTrackerMIL* tracker(new MultiTrackerMIL);
                 tracker->InitializeTracker(ROIs, sequence);
                 tracker->RunTracking();
             }
                 break; */
-            /*case BackendWorkerHelpers::TrackerType::GOTURN: {
+                /*case BackendWorkerHelpers::TrackerType::GOTURN: {
+                    MultiTrackerMIL* tracker(new MultiTrackerMIL);
+                    tracker->InitializeTracker(ROIs, sequence);
+                    tracker->RunTracking();
+                }
+                    break; */
+            case BackendWorkerHelpers::TrackerType::MIL: {
                 MultiTrackerMIL* tracker(new MultiTrackerMIL);
                 tracker->InitializeTracker(ROIs, sequence);
                 tracker->RunTracking();
             }
-                break; */
-            case BackendWorkerHelpers::TrackerType::MIL: {
-                MultiTrackerMIL* tracker(new MultiTrackerMIL);
-                tracker->InitializeTracker(ROIs, sequence);
-                tracker->RunTracking();  
-            }
-                break;
+                                                       break;
             case BackendWorkerHelpers::TrackerType::MedianFlow: {
                 MultiTrackerMedianFlow* tracker(new MultiTrackerMedianFlow);
                 tracker->InitializeTracker(ROIs, sequence);
                 tracker->RunTracking();
             }
-                break;
+                                                              break;
             case BackendWorkerHelpers::TrackerType::KCF: {
                 MultiTrackerKCF* tracker(new MultiTrackerKCF);
                 tracker->InitializeTracker(ROIs, sequence);
                 tracker->RunTracking();
             }
-                break;
+                                                       break;
             case BackendWorkerHelpers::TrackerType::Boosting: {
                 MultiTrackerBoosting* tracker(new MultiTrackerBoosting);
                 tracker->InitializeTracker(ROIs, sequence);
                 tracker->RunTracking();
             }
-               break;
+                                                            break;
             case BackendWorkerHelpers::TrackerType::HoughCircles: {
                 MultiHoughCirclesTracker* tracker(new MultiHoughCirclesTracker);
                 tracker->InitializeTracker(ROIs, sequence);
                 tracker->RunTracking();
             }
-               break;
+                                                                break;
             case BackendWorkerHelpers::TrackerType::BlobDetector: {
                 MultiBlobDetectorTracker* tracker(new MultiBlobDetectorTracker);
                 tracker->InitializeTracker(ROIs, sequence);
                 tracker->RunTracking();
             }
-               break;
+                                                                break;
             }
         }
     }

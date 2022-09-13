@@ -8,8 +8,8 @@ Window {
     id: window
     title: "Tracker"
     visible: true
-    width: 1260
-    height: 720
+    width: 1480
+    height: 846
     property var switchesStatus: []
     
     RowLayout {
@@ -187,15 +187,71 @@ Window {
             getAllSelectedTrackers();
         }
     }
+
+        Connections {
+        target: backendController
+        
+        function onImportingFailed()
+        {
+           var errorPopup = Qt.createQmlObject('
+           import QtQuick 2.9;
+           import QtQuick.Controls 2.1;
+          
+           Popup { 
+              id: popup; modal: true; focus: true; 
+              anchors.centerIn: parent
+              closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside;
+              visible: false 
+
+              Text {
+                text: "Invalid video capture path! Only .mp4 and .avi files supported."
+                anchors.centerIn: parent
+                font.pointSize: 10
+              }
+          }',
+          window,
+          "BadVideoPopup");
+           errorPopup.open();
+        }
+    }
     
     function getAllSelectedTrackers()
     {
+        var anySelected = false;
         for (let i = 0; i < trackerSelectionColumnLayout.children.length; i++)
         {
             switchesStatus.push(trackerSelectionColumnLayout.children[i].checked);
+            if (trackerSelectionColumnLayout.children[i].checked)
+            {
+                anySelected = true;
+            }
         }
         console.log(switchesStatus);
-        backendWorker.GetSelectedTrackers(switchesStatus);
-        backendWorker.RunAllTrackers();
+        if (anySelected)
+        {
+            backendWorker.GetSelectedTrackers(switchesStatus);
+            backendWorker.RunAllTrackers();
+        } else
+        {
+          var errorPopup = Qt.createQmlObject('
+           import QtQuick 2.9;
+           import QtQuick.Controls 2.1;
+          
+           Popup { 
+              id: popup; modal: true; focus: true; 
+              anchors.centerIn: parent
+              closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside;
+              visible: false 
+
+              Text {
+                text: "No selected tracking method! Select atleast one."
+                anchors.centerIn: parent
+                font.pointSize: 10
+              }
+          }',
+          window,
+          "BadVideoPopup");
+           errorPopup.open();
+        }
     }
 }

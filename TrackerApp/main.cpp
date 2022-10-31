@@ -21,13 +21,13 @@ int main(int argc, char *argv[])
     BackendWorker* backendWorker(new BackendWorker);
     FrameImageProvider* frameImageProvider(new FrameImageProvider);
     ImageViewer* imageViewer(new ImageViewer);
-    auto backendController = BackendController(backendWorker, nullptr);
+    auto backendController = &BackendController(backendWorker, nullptr);
 
     engine.rootContext()->setContextProperty("frameImageProvider", frameImageProvider);
     engine.rootContext()->setContextProperty("imageViewer", imageViewer);
     engine.rootContext()->setContextProperty("backendWorker", backendWorker);
     engine.addImageProvider("frameProvider", frameImageProvider);
-    engine.rootContext()->setContextProperty("backendController", &backendController);
+    engine.rootContext()->setContextProperty("backendController", backendController);
 
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty())

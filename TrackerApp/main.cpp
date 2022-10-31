@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
     BackendWorker* backendWorker(new BackendWorker);
     FrameImageProvider* frameImageProvider(new FrameImageProvider);
     ImageViewer* imageViewer(new ImageViewer);
-    auto backendController = BackendController(backendWorker, nullptr);
+    BackendController backendController(backendWorker);
 
     engine.rootContext()->setContextProperty("frameImageProvider", frameImageProvider);
     engine.rootContext()->setContextProperty("imageViewer", imageViewer);

@@ -1,5 +1,6 @@
 #pragma once
 #include <QThread>
+#include <QObject>
 
 #include "BackendWorker.h"
 

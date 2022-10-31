@@ -34,7 +34,7 @@ public:
 	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, int radius = 10);
 
 	/*Method used to run tracking of markers on given sequence and ROIs.*/
-	virtual void RunTracking();
+	void RunTracking() override;
 
 private:
 	cv::SimpleBlobDetector::Params circleBlobDetectorParams;

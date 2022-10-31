@@ -36,6 +36,13 @@ Q_INVOKABLE void BackendWorker::GetFirstFrameROIs()
 {
     auto firstFrame = sequence.front();
     cv::selectROIs("Select ROI, press Enter and select next. Press ESC to finish selection", firstFrame, ROIs);
+    for (const auto& ROI : ROIs)
+    {
+        cv::rectangle(firstFrame,ROI, cv::Scalar(255, 0, 0), 2, 1);
+        cv::circle(firstFrame, cv::Point(ROI.x + ROI.width/2, ROI.y + ROI.height/2), 15, cv::Scalar(0,255,0));
+    }
+    cv::imshow("SelectedROIs", firstFrame);
+    cv::waitKey(0);
     std::cout << "Roi selected";
 }
 

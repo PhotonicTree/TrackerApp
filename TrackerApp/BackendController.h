@@ -1,6 +1,7 @@
 #pragma once
-#include "BackendWorker.h"
 #include <QThread>
+
+#include "BackendWorker.h"
 
 /*!	\file BackendController.h
 	This file contains BackendController class for creating all connections with QML frontend and heavy operations on another thread.

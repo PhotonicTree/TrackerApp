@@ -97,7 +97,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -106,6 +106,7 @@
     <ClCompile Include="BackendWorker.cpp" />
     <ClCompile Include="FrameImageProvider.cpp" />
     <ClCompile Include="ImageViewer.cpp" />
+    <ClCompile Include="JsonTrackerObject.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Trackers.cpp" />
     <QtRcc Include="qml.qrc" />
@@ -120,6 +121,8 @@
     <QtMoc Include="BackendWorker.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="json.hpp" />
+    <ClInclude Include="JsonTrackerObject.h" />
     <ClInclude Include="Trackers.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

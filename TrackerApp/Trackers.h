@@ -21,6 +21,7 @@ public:
 protected:
 	std::vector<cv::Rect> ROIs;			//Vector of cv::Rect with selected regions of interests by user.
 	std::vector<cv::Mat> sequence;		//Vector with sequence of images to be analyze.
+	std::string sequenceFileName;
 };
 
 class MultiBlobDetectorTracker : public BaseTracker
@@ -31,7 +32,7 @@ public:
 		\param[in] images std::vector<cv::Mat> with loaded sequence of images.
 		\param[in] radius int value of circle to be drawn around found marker.
 	*/
-	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, int radius = 10);
+	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName, int radius = 10);
 
 	/*Method used to run tracking of markers on given sequence and ROIs.*/
 	void RunTracking() override;
@@ -48,7 +49,7 @@ public:
 		\param[in] boundingBoxes std::vector<cv::Rect> with selected bounding boxes.
 		\param[in] images std::vector<cv::Mat> with loaded sequence of images.
 	*/
-	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images);
+	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName);
 
 	/*Method used to run tracking of markers on given sequence and ROIs.*/
 	virtual void RunTracking();
@@ -61,7 +62,7 @@ public:
 		\param[in] boundingBoxes std::vector<cv::Rect> with selected bounding boxes.
 		\param[in] images std::vector<cv::Mat> with loaded sequence of images.
 	*/
-	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images);
+	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName);
 
 	/*Method used to run tracking of markers on given sequence and ROIs.*/
 	virtual void RunTracking();
@@ -74,7 +75,7 @@ public:
 		\param[in] boundingBoxes std::vector<cv::Rect> with selected bounding boxes.
 		\param[in] images std::vector<cv::Mat> with loaded sequence of images.
 	*/
-	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images);
+	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName);
 
 	/*Method used to run tracking of markers on given sequence and ROIs.*/
 	virtual void RunTracking();
@@ -87,7 +88,7 @@ public:
 		\param[in] boundingBoxes std::vector<cv::Rect> with selected bounding boxes.
 		\param[in] images std::vector<cv::Mat> with loaded sequence of images.
 	*/
-	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images);
+	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName);
 
 	/*Method used to run tracking of markers on given sequence and ROIs.*/
 	virtual void RunTracking();
@@ -100,7 +101,7 @@ public:
 		\param[in] boundingBoxes std::vector<cv::Rect> with selected bounding boxes.
 		\param[in] images std::vector<cv::Mat> with loaded sequence of images.
 	*/
-	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images);
+	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName);
 
 	/*Method used to run tracking of markers on given sequence and ROIs.*/
 	virtual void RunTracking();
@@ -113,7 +114,7 @@ public:
 		\param[in] boundingBoxes std::vector<cv::Rect> with selected bounding boxes.
 		\param[in] images std::vector<cv::Mat> with loaded sequence of images.
 	*/
-	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images);
+	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName);
 
 	/*Method used to run tracking of markers on given sequence and ROIs.*/
 	virtual void RunTracking();
@@ -126,7 +127,7 @@ public:
 		\param[in] boundingBoxes std::vector<cv::Rect> with selected bounding boxes.
 		\param[in] images std::vector<cv::Mat> with loaded sequence of images.
 	*/
-	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images);
+	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName);
 
 	/*Method used to run tracking of markers on given sequence and ROIs.*/
 	virtual void RunTracking();
@@ -139,7 +140,7 @@ public:
 		\param[in] boundingBoxes std::vector<cv::Rect> with selected bounding boxes.
 		\param[in] images std::vector<cv::Mat> with loaded sequence of images.
 	*/
-	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images);
+	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName);
 
 	/*Method used to run tracking of markers on given sequence and ROIs.*/
 	virtual void RunTracking();
@@ -152,7 +153,7 @@ public:
 		\param[in] boundingBoxes std::vector<cv::Rect> with selected bounding boxes.
 		\param[in] images std::vector<cv::Mat> with loaded sequence of images.
 	*/
-	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images);
+	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName);
 
 	/*Method used to run tracking of markers on given sequence and ROIs.*/
 	virtual void RunTracking();
@@ -165,7 +166,7 @@ public:
 		\param[in] boundingBoxes std::vector<cv::Rect> with selected bounding boxes.
 		\param[in] images std::vector<cv::Mat> with loaded sequence of images.
 	*/
-	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images);
+	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName);
 
 	/*Method used to run tracking of markers on given sequence and ROIs.*/
 	virtual void RunTracking();

@@ -1,4 +1,7 @@
 #include "Trackers.h"
+#include "JsonTrackerObject.h"
+#include <string>
+#include <fstream>
 
 BaseTracker::BaseTracker()
 {
@@ -32,41 +35,45 @@ template <typename T> void RunTrackingForOpenCVLegacyTracker(std::vector<cv::Rec
 
 void MultiTrackerMIL::RunTracking()
 {
-    RunTrackingForOpenCVLegacyTracker<cv::legacy::TrackerMIL>(ROIs, sequence);
+    RunTrackingForOpenCVLegacyTracker<cv::legacy::TrackerMIL>(ROIs, sequence, sequenceFileName);
 }
 
-void MultiTrackerMIL::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)
+void MultiTrackerMIL::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName)
 { 
     this->ROIs = boundingBoxes;
     this->sequence = images;
+    this->sequenceFileName = sequenceName;
 }
 
-void MultiTrackerMOSSE::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)
+void MultiTrackerMOSSE::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName)
 {
     this->ROIs = boundingBoxes;
     this->sequence = images;
+    this->sequenceFileName = sequenceName;
 }
 
 void MultiTrackerMOSSE::RunTracking()
 {
-    RunTrackingForOpenCVLegacyTracker<cv::legacy::TrackerMOSSE>(ROIs, sequence);
+    RunTrackingForOpenCVLegacyTracker<cv::legacy::TrackerMOSSE>(ROIs, sequence, sequenceFileName);
 }
 
-void MultiTrackerCSRT::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)
+void MultiTrackerCSRT::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName)
 {
     this->ROIs = boundingBoxes;
     this->sequence = images;
+    this->sequenceFileName = sequenceName;
 }
 
 void MultiTrackerCSRT::RunTracking()
 {
-    RunTrackingForOpenCVLegacyTracker<cv::legacy::TrackerCSRT>(ROIs, sequence);
+    RunTrackingForOpenCVLegacyTracker<cv::legacy::TrackerCSRT>(ROIs, sequence, sequenceFileName);
 }
 
-void MultiTrackerGOTURN::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)
+void MultiTrackerGOTURN::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName)
 {
     this->ROIs = boundingBoxes;
     this->sequence = images;
+    this->sequenceFileName = sequenceName;
 }
 
 void MultiTrackerGOTURN::RunTracking()
@@ -74,65 +81,71 @@ void MultiTrackerGOTURN::RunTracking()
 //    RunTrackingForOpenCVLegacyTracker
 }
 
-void MultiTrackerDaSiamRPN::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)
+void MultiTrackerDaSiamRPN::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName)
 {
     this->ROIs = boundingBoxes;
     this->sequence = images;
+    this->sequenceFileName = sequenceName;
 }
 
 void MultiTrackerDaSiamRPN::RunTracking()
 {
-//   RunTrackingForOpenCVLegacyTracker<cv::legacy::TrackerMIL>(ROIs, sequence);
+//   RunTrackingForOpenCVLegacyTracker<cv::legacy::TrackerMIL>(ROIs, sequence, sequenceFileName);
 }
 
-void MultiTrackerTLD::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)
+void MultiTrackerTLD::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName)
 {
     this->ROIs = boundingBoxes;
     this->sequence = images;
+    this->sequenceFileName = sequenceName;
 }
 
 void MultiTrackerTLD::RunTracking()
 {
-    RunTrackingForOpenCVLegacyTracker<cv::legacy::TrackerTLD>(ROIs, sequence);
+    RunTrackingForOpenCVLegacyTracker<cv::legacy::TrackerTLD>(ROIs, sequence, sequenceFileName);
 }
 
-void MultiTrackerBoosting::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)
+void MultiTrackerBoosting::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName)
 {
     this->ROIs = boundingBoxes;
     this->sequence = images;
+    this->sequenceFileName = sequenceName;
 }
 
 void MultiTrackerBoosting::RunTracking()
 {
-    RunTrackingForOpenCVLegacyTracker<cv::legacy::TrackerBoosting>(ROIs, sequence);
+    RunTrackingForOpenCVLegacyTracker<cv::legacy::TrackerBoosting>(ROIs, sequence, sequenceFileName);
 }
 
-void MultiTrackerKCF::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)
+void MultiTrackerKCF::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName)
 {
     this->ROIs = boundingBoxes;
     this->sequence = images;
+    this->sequenceFileName = sequenceName;
 }
 
 void MultiTrackerKCF::RunTracking()
 {
-    RunTrackingForOpenCVLegacyTracker<cv::legacy::TrackerKCF>(ROIs, sequence);
+    RunTrackingForOpenCVLegacyTracker<cv::legacy::TrackerKCF>(ROIs, sequence, sequenceFileName);
 }
 
-void MultiTrackerMedianFlow::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)
+void MultiTrackerMedianFlow::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName)
 {
     this->ROIs = boundingBoxes;
     this->sequence = images;
+    this->sequenceFileName = sequenceName;
 }
 
 void MultiTrackerMedianFlow::RunTracking()
 {
-    RunTrackingForOpenCVLegacyTracker<cv::legacy::TrackerMedianFlow>(ROIs, sequence);
+    RunTrackingForOpenCVLegacyTracker<cv::legacy::TrackerMedianFlow>(ROIs, sequence, sequenceFileName);
 }
 
-void MultiHoughCirclesTracker::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)
+void MultiHoughCirclesTracker::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName)
 {
     this->ROIs = boundingBoxes;
     this->sequence = images;
+    this->sequenceFileName = sequenceName;
 }
 
 void MultiHoughCirclesTracker::RunTracking()
@@ -164,7 +177,7 @@ void MultiHoughCirclesTracker::RunTracking()
     }
 }
 
-void MultiBlobDetectorTracker::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, int radius)
+void MultiBlobDetectorTracker::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName, int radius)
 {
     this->ROIs = boundingBoxes;
     this->sequence = images;

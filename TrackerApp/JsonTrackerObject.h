@@ -1,12 +1,10 @@
 #pragma once
 #include "json.hpp"
 
-class JsonTrackerObject
+class JsonTrackerObject : public nlohmann::json
 {
 public:
 	JsonTrackerObject();
 	~JsonTrackerObject();
-private:
-	nlohmann::json jsonObject;
 };
 

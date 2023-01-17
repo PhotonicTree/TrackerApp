@@ -11,26 +11,75 @@ BaseTracker::~BaseTracker()
 {
 }
 
-template <typename T> void RunTrackingForOpenCVLegacyTracker(std::vector<cv::Rect> ROIs, std::vector<cv::Mat> sequence)
+template <typename T> void RunTrackingForOpenCVLegacyTracker(std::vector<cv::Rect> ROIs, std::vector<cv::Mat> sequence, std::string sequenceName)
 {
+    std::vector<std::pair<int, cv::Rect>> tracks;
+    tracks.reserve(sequence.size());
+    JsonTrackerObject jsonTrackerObject;
+
     auto multiTracker = cv::legacy::MultiTracker::create();
     for (const auto ROI : ROIs)
     {
         multiTracker->add(T::create(), sequence.front(), ROI);
     }
+    // Get name of current tracker and push to json file.
+    std::string trackerTypeName = typeid(T).name();
+    trackerTypeName.erase(0, trackerTypeName.find_last_of(':') + 1);
 
     for (size_t i = 1; i < sequence.size(); i++)
     {
-        auto image = sequence.at(i);
+        std::vector<std::array<int, 4>> frameResult;
+        auto image = sequence.at(i); 
         multiTracker->update(image);
         auto& trackerObjects = multiTracker->getObjects();
-        for (size_t i = 0; i < trackerObjects.size(); i++)
+        for (size_t j = 0; j < trackerObjects.size(); j++)
         {
-            cv::rectangle(image, trackerObjects[i], cv::Scalar(255, 0, 0), 2, 1);
+            auto trackerObject = trackerObjects[j];
+            cv::rectangle(image, trackerObject, cv::Scalar(255, 0, 0), 2, 1);
+            std::array<int, 4> boundingBox = { static_cast<int>(trackerObject.x), static_cast<int>(trackerObject.y), static_cast<int>(trackerObject.width), static_cast<int>(trackerObject.height) };
+            frameResult.push_back(boundingBox);
         }
-        cv::imshow("Tracker result. Press 'x' to quit", image);
-        if (cv::waitKey(100) == 27) break;
+
+        // prepare string to json
+        std::string frameResultLine = "";
+        for (auto bBox : frameResult)
+        {
+            std::string currentRectangle = "(";
+            for (auto number : bBox)
+            {
+                currentRectangle += std::to_string(number);
+
+                if (number != *(bBox.end() - 1))
+                {
+                   currentRectangle += ",";
+                }
+                else
+                {
+                   currentRectangle += ")";
+                }
+            }
+            frameResultLine += currentRectangle;
+            if (bBox != *(frameResult.end() - 1))
+            {
+               frameResultLine += ",";
+            }
+        }
+        size_t n = 4;
+        auto frameNumber = std::to_string(i);
+        int precision = n - std::min(n, frameNumber.size());
+        frameNumber.insert(0, precision, '0');
+        jsonTrackerObject[trackerTypeName][frameNumber] = frameResultLine;
+
+
+
+        //cv::imshow("Tracker result. Press 'x' to quit", image);
+        //if (cv::waitKey(100) == 27) break;
     }
+    auto outputFileName = sequenceName.substr(0, sequenceName.find_first_of('.'));
+    outputFileName += ".json";
+    
+    std::ofstream exportJSONFile("Results\\" + outputFileName);
+    exportJSONFile << jsonTrackerObject.dump(4);
 }
 
 void MultiTrackerMIL::RunTracking()

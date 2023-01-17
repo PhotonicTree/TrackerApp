@@ -4,7 +4,7 @@ Q_INVOKABLE void BackendWorker::ImportSequence(const QString& path)
 {
 	const auto sequencePath = path.toStdString();
 	videoCapture.open(sequencePath);
-
+    sequenceName = sequencePath.substr(sequencePath.find_last_of("/\\") + 1);
     if (!videoCapture.isOpened()) {
         std::cout << "Error opening video stream or file!" << std::endl;
         emit importingFailed();
@@ -36,12 +36,6 @@ Q_INVOKABLE void BackendWorker::GetFirstFrameROIs()
 {
     auto firstFrame = sequence.front();
     cv::selectROIs("Select ROI, press Enter and select next. Press ESC to finish selection", firstFrame, ROIs);
-    for (const auto& ROI : ROIs)
-    {
-        cv::rectangle(firstFrame,ROI, cv::Scalar(255, 0, 0), 2, 1);
-        cv::circle(firstFrame, cv::Point(ROI.x + ROI.width/2, ROI.y + ROI.height/2), 15, cv::Scalar(0,255,0));
-    }
-    cv::imshow("SelectedROIs", firstFrame);
     cv::waitKey(0);
     std::cout << "Roi selected";
 }
@@ -65,61 +59,61 @@ Q_INVOKABLE void BackendWorker::RunAllTrackers()
             switch (selectedTracker.first) {
             case BackendWorkerHelpers::TrackerType::CSRT: {
                 MultiTrackerCSRT* tracker(new MultiTrackerCSRT);
-                tracker->InitializeTracker(ROIs, sequence);
+                tracker->InitializeTracker(ROIs, sequence, sequenceName);
                 tracker->RunTracking();
             }
                                                         break;
             case BackendWorkerHelpers::TrackerType::MOSSE: {
                 MultiTrackerMOSSE* tracker(new MultiTrackerMOSSE);
-                tracker->InitializeTracker(ROIs, sequence);
+                tracker->InitializeTracker(ROIs, sequence, sequenceName);
                 tracker->RunTracking();
             }
                                                          break;
             /*case BackendWorkerHelpers::TrackerType::DaSiamRPN: {
                 MultiTrackerMIL* tracker(new MultiTrackerMIL);
-                tracker->InitializeTracker(ROIs, sequence);
+                tracker->InitializeTracker(ROIs, sequence, sequenceName);
                 tracker->RunTracking();
             }
                 break; */
                 /*case BackendWorkerHelpers::TrackerType::GOTURN: {
                     MultiTrackerMIL* tracker(new MultiTrackerMIL);
-                    tracker->InitializeTracker(ROIs, sequence);
+                    tracker->InitializeTracker(ROIs, sequence, sequenceName);
                     tracker->RunTracking();
                 }
                     break; */
             case BackendWorkerHelpers::TrackerType::MIL: {
                 MultiTrackerMIL* tracker(new MultiTrackerMIL);
-                tracker->InitializeTracker(ROIs, sequence);
+                tracker->InitializeTracker(ROIs, sequence, sequenceName);
                 tracker->RunTracking();
             }
                                                        break;
             case BackendWorkerHelpers::TrackerType::MedianFlow: {
                 MultiTrackerMedianFlow* tracker(new MultiTrackerMedianFlow);
-                tracker->InitializeTracker(ROIs, sequence);
+                tracker->InitializeTracker(ROIs, sequence, sequenceName);
                 tracker->RunTracking();
             }
                                                               break;
             case BackendWorkerHelpers::TrackerType::KCF: {
                 MultiTrackerKCF* tracker(new MultiTrackerKCF);
-                tracker->InitializeTracker(ROIs, sequence);
+                tracker->InitializeTracker(ROIs, sequence, sequenceName);
                 tracker->RunTracking();
             }
                                                        break;
             case BackendWorkerHelpers::TrackerType::Boosting: {
                 MultiTrackerBoosting* tracker(new MultiTrackerBoosting);
-                tracker->InitializeTracker(ROIs, sequence);
+                tracker->InitializeTracker(ROIs, sequence, sequenceName);
                 tracker->RunTracking();
             }
                                                             break;
             case BackendWorkerHelpers::TrackerType::HoughCircles: {
                 MultiHoughCirclesTracker* tracker(new MultiHoughCirclesTracker);
-                tracker->InitializeTracker(ROIs, sequence);
+                tracker->InitializeTracker(ROIs, sequence, sequenceName);
                 tracker->RunTracking();
             }
                                                                 break;
             case BackendWorkerHelpers::TrackerType::BlobDetector: {
                 MultiBlobDetectorTracker* tracker(new MultiBlobDetectorTracker);
-                tracker->InitializeTracker(ROIs, sequence);
+                tracker->InitializeTracker(ROIs, sequence, sequenceName);
                 tracker->RunTracking();
             }
                                                                 break;

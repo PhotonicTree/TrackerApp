@@ -74,6 +74,7 @@ private:
 	cv::VideoCapture videoCapture;		// VideoCapture loaded by user.
 	std::vector<cv::Rect> ROIs;			// Vector of cv::Rect with selected regions of interests by user.
 	std::map<BackendWorkerHelpers::TrackerType, bool> selectedTrackers;		// Map with tracker types as a key and them boolean state as value.
+	std::string sequenceName;
 };
 
 

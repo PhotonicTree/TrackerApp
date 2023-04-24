@@ -217,7 +217,7 @@ void MultiHoughCirclesTracker::RunTracking(JsonTrackerObject &jsonObject)
     }
 }
 
-void MultiBlobDetectorTracker::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName, int radius)
+void MultiBlobDetectorTracker::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, int radius)
 {
     this->ROIs = boundingBoxes;
     this->sequence = images;
@@ -258,21 +258,41 @@ void MultiBlobDetectorTracker::InitializeTracker(std::vector<cv::Rect>& bounding
     circleBlobDetectorParams.maxInertiaRatio = 1.01F;
 }
 
-void MultiBlobDetectorTracker::RunTracking()
+void MultiBlobDetectorTracker::RunTracking(JsonTrackerObject &jsonObject)
 {
     auto blobDetector = cv::SimpleBlobDetector::create(circleBlobDetectorParams);
-    std::vector<std::vector<cv::KeyPoint>> keypoints(100);
+    std::vector<std::vector<cv::KeyPoint>> keypoints(1000);
     for (auto i = 0; i < sequence.size(); ++i)
     {
-        blobDetector->detect(sequence.at(i), keypoints.at(i));
+        auto image = sequence.at(i);
+        std::string frameResultLine = "";
+        blobDetector->detect(image, keypoints.at(i));
 
-        for (size_t j = 0; j < keypoints.at(i).size(); ++j)
+        if (!keypoints.at(i).empty())
         {
-            cv::Point center(cvRound(keypoints.at(i).at(j).pt.x), cvRound(keypoints.at(i).at(j).pt.y));
-            // draw the circle center
-            cv::circle(sequence[i], center, 3, cv::Scalar(0, 255, 0), -1, 8, 0);
-            // draw the circle outline
-            circle(sequence[i], center, circleRadius, cv::Scalar(0, 0, 255), 3, 8, 0);
+            for (size_t j = 0; j < keypoints.at(i).size(); ++j)
+            {
+                cv::Point center(cvRound(keypoints.at(i).at(j).pt.x), cvRound(keypoints.at(i).at(j).pt.y));
+                // draw the circle center
+                cv::circle(image, center, 3, cv::Scalar(0, 255, 0), -1, 8, 0);
+                // draw the circle outline
+                circle(image, center, circleRadius, cv::Scalar(0, 0, 255), 3, 8, 0);
+                cv::putText(image, cv::String(std::to_string(j)), center, cv::FONT_HERSHEY_SIMPLEX, 0.8, cv::Scalar(255, 255, 255), 2);
+
+                frameResultLine += "(" + std::to_string(center.x) + ";" + std::to_string(center.y) + "),";
+            }
         }
+        else
+        {
+            frameResultLine += "(0;0)";
+        }
+   
+        cv::imshow("Tracker result. Press 'x' to quit", image);
+        if (cv::waitKey(100) == 27) break;
+        size_t n = 4;
+        auto frameNumber = std::to_string(i);
+        int precision = n - std::min(n, frameNumber.size());
+        frameNumber.insert(0, precision, '0');
+        jsonObject["MultiBlobDetector"][frameNumber] = frameResultLine;
     }
 }

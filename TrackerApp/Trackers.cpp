@@ -1,7 +1,7 @@
 #include "Trackers.h"
-#include "JsonTrackerObject.h"
 #include <string>
-#include <fstream>
+#include <iostream>
+#include <chrono>
 
 BaseTracker::BaseTracker()
 {
@@ -11,12 +11,8 @@ BaseTracker::~BaseTracker()
 {
 }
 
-template <typename T> void RunTrackingForOpenCVLegacyTracker(std::vector<cv::Rect> ROIs, std::vector<cv::Mat> sequence, std::string sequenceName)
+template <typename T> void RunTrackingForOpenCVLegacyTracker(std::vector<cv::Rect> ROIs, std::vector<cv::Mat> sequence, JsonTrackerObject &jsonTrackersObject)
 {
-    std::vector<std::pair<int, cv::Rect>> tracks;
-    tracks.reserve(sequence.size());
-    JsonTrackerObject jsonTrackerObject;
-
     auto multiTracker = cv::legacy::MultiTracker::create();
     for (const auto ROI : ROIs)
     {
@@ -25,18 +21,20 @@ template <typename T> void RunTrackingForOpenCVLegacyTracker(std::vector<cv::Rec
     // Get name of current tracker and push to json file.
     std::string trackerTypeName = typeid(T).name();
     trackerTypeName.erase(0, trackerTypeName.find_last_of(':') + 1);
-
+    auto tik = std::chrono::high_resolution_clock::now();
     for (size_t i = 1; i < sequence.size(); i++)
     {
         std::vector<std::array<int, 4>> frameResult;
-        auto image = sequence.at(i); 
+        auto image = sequence.at(i);
+        cv::Mat show = image.clone();
         multiTracker->update(image);
         auto& trackerObjects = multiTracker->getObjects();
         for (size_t j = 0; j < trackerObjects.size(); j++)
         {
             auto trackerObject = trackerObjects[j];
-            cv::rectangle(image, trackerObject, cv::Scalar(255, 0, 0), 2, 1);
-            std::array<int, 4> boundingBox = { static_cast<int>(trackerObject.x), static_cast<int>(trackerObject.y), static_cast<int>(trackerObject.width), static_cast<int>(trackerObject.height) };
+            cv::rectangle(show, trackerObject, cv::Scalar(255, 0, 0), 2, 1);
+            std::array<int, 4> boundingBox = { static_cast<int>(trackerObject.x + trackerObject.width/2), static_cast<int>(trackerObject.y + trackerObject.height/2),
+                static_cast<int>(trackerObject.width), static_cast<int>(trackerObject.height)};
             frameResult.push_back(boundingBox);
         }
 
@@ -44,6 +42,11 @@ template <typename T> void RunTrackingForOpenCVLegacyTracker(std::vector<cv::Rec
         std::string frameResultLine = "";
         for (auto bBox : frameResult)
         {
+            if (bBox[0] == 0)
+            {
+                frameResultLine = "(0;0;0;0)";
+                break;
+            }
             std::string currentRectangle = "(";
             for (auto number : bBox)
             {
@@ -51,7 +54,7 @@ template <typename T> void RunTrackingForOpenCVLegacyTracker(std::vector<cv::Rec
 
                 if (number != *(bBox.end() - 1))
                 {
-                   currentRectangle += ",";
+                   currentRectangle += ";";
                 }
                 else
                 {

@@ -35,8 +35,8 @@ Q_INVOKABLE void BackendWorker::DisplaySequence()
 Q_INVOKABLE void BackendWorker::GetFirstFrameROIs()
 {
     auto firstFrame = sequence.front();
-    cv::selectROIs("Select ROI, press Enter and select next. Press ESC to finish selection", firstFrame, ROIs);
-    cv::waitKey(0);
+    cv::selectROIs("Select ROI", firstFrame, ROIs);
+    cv::destroyWindow("Select ROI");
     std::cout << "Roi selected";
 }
 

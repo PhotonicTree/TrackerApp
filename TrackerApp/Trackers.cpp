@@ -224,11 +224,11 @@ void MultiBlobDetectorTracker::InitializeTracker(std::vector<cv::Rect>& bounding
     // https://docs.opencv.org/4.5.1/d0/d7a/classcv_1_1SimpleBlobDetector.html
 
     // Filter by intensity (thresholding)
-    circleBlobDetectorParams.thresholdStep = 30;
-    circleBlobDetectorParams.minThreshold = 50;
-    circleBlobDetectorParams.maxThreshold = 231;
-    circleBlobDetectorParams.minRepeatability = 2;
-    circleBlobDetectorParams.minDistBetweenBlobs = 20;
+    circleBlobDetectorParams.thresholdStep = 1;
+    circleBlobDetectorParams.minThreshold = 20;
+    circleBlobDetectorParams.maxThreshold = 150;
+    circleBlobDetectorParams.minRepeatability = 4;
+    circleBlobDetectorParams.minDistBetweenBlobs = 10;
 
     // Filter by color
     circleBlobDetectorParams.filterByColor = true;
@@ -236,18 +236,17 @@ void MultiBlobDetectorTracker::InitializeTracker(std::vector<cv::Rect>& bounding
 
     // Filter by area
     circleBlobDetectorParams.filterByArea = true;
-    circleBlobDetectorParams.minArea = 80;
-    circleBlobDetectorParams.maxArea = 1200;
+    circleBlobDetectorParams.minArea = 700;
+    circleBlobDetectorParams.maxArea = 1500;
 
     // Filter by circularity
     circleBlobDetectorParams.filterByCircularity = true;
-    circleBlobDetectorParams.minCircularity = 0.40F;
-    circleBlobDetectorParams.maxCircularity = 0.94F;
+    circleBlobDetectorParams.minCircularity = 0.80F;
+    circleBlobDetectorParams.maxCircularity = 1.0F;
 
     // Filter by convexity
     circleBlobDetectorParams.filterByConvexity = true;
-    circleBlobDetectorParams.minConvexity = 0.93F;
-    circleBlobDetectorParams.maxConvexity = 1.01F;
+    circleBlobDetectorParams.minConvexity = 0.8F;
 
     // Filter by inertia
     // https://stackoverflow.com/questions/14770756/opencv-simpleblobdetector-filterbyinertia-meaning

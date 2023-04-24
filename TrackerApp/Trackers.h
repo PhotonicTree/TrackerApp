@@ -1,4 +1,5 @@
 #pragma once
+#include "JsonTrackerObject.h"
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/core.hpp>
@@ -16,7 +17,7 @@ public:
 	~BaseTracker();
 
 	/*Pure virtual function dedicated to inheriting classes for performing tracking.*/
-	virtual void RunTracking() = 0;
+	virtual void RunTracking(JsonTrackerObject &jsonObject) = 0;
 	
 protected:
 	std::vector<cv::Rect> ROIs;			//Vector of cv::Rect with selected regions of interests by user.
@@ -32,10 +33,10 @@ public:
 		\param[in] images std::vector<cv::Mat> with loaded sequence of images.
 		\param[in] radius int value of circle to be drawn around found marker.
 	*/
-	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName, int radius = 10);
+	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, int radius = 20);
 
 	/*Method used to run tracking of markers on given sequence and ROIs.*/
-	void RunTracking() override;
+	void RunTracking(JsonTrackerObject &jsonObject) override;
 
 private:
 	cv::SimpleBlobDetector::Params circleBlobDetectorParams;
@@ -49,10 +50,10 @@ public:
 		\param[in] boundingBoxes std::vector<cv::Rect> with selected bounding boxes.
 		\param[in] images std::vector<cv::Mat> with loaded sequence of images.
 	*/
-	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName);
+	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images);
 
 	/*Method used to run tracking of markers on given sequence and ROIs.*/
-	virtual void RunTracking();
+	virtual void RunTracking(JsonTrackerObject &jsonObject);
 };
 
 class MultiHoughCirclesTracker : public BaseTracker
@@ -62,10 +63,10 @@ public:
 		\param[in] boundingBoxes std::vector<cv::Rect> with selected bounding boxes.
 		\param[in] images std::vector<cv::Mat> with loaded sequence of images.
 	*/
-	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName);
+	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images);
 
 	/*Method used to run tracking of markers on given sequence and ROIs.*/
-	virtual void RunTracking();
+	virtual void RunTracking(JsonTrackerObject &jsonObject);
 };
 
 class MultiTrackerMOSSE : public BaseTracker
@@ -75,10 +76,10 @@ public:
 		\param[in] boundingBoxes std::vector<cv::Rect> with selected bounding boxes.
 		\param[in] images std::vector<cv::Mat> with loaded sequence of images.
 	*/
-	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName);
+	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images);
 
 	/*Method used to run tracking of markers on given sequence and ROIs.*/
-	virtual void RunTracking();
+	virtual void RunTracking(JsonTrackerObject &jsonObject);
 };
 
 class MultiTrackerCSRT : public BaseTracker
@@ -88,10 +89,10 @@ public:
 		\param[in] boundingBoxes std::vector<cv::Rect> with selected bounding boxes.
 		\param[in] images std::vector<cv::Mat> with loaded sequence of images.
 	*/
-	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName);
+	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images);
 
 	/*Method used to run tracking of markers on given sequence and ROIs.*/
-	virtual void RunTracking();
+	virtual void RunTracking(JsonTrackerObject &jsonObject);
 };
 
 class MultiTrackerGOTURN : public BaseTracker
@@ -101,10 +102,10 @@ public:
 		\param[in] boundingBoxes std::vector<cv::Rect> with selected bounding boxes.
 		\param[in] images std::vector<cv::Mat> with loaded sequence of images.
 	*/
-	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName);
+	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images);
 
 	/*Method used to run tracking of markers on given sequence and ROIs.*/
-	virtual void RunTracking();
+	virtual void RunTracking(JsonTrackerObject &jsonObject);
 };
 
 class MultiTrackerDaSiamRPN : public BaseTracker
@@ -114,10 +115,10 @@ public:
 		\param[in] boundingBoxes std::vector<cv::Rect> with selected bounding boxes.
 		\param[in] images std::vector<cv::Mat> with loaded sequence of images.
 	*/
-	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName);
+	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images);
 
 	/*Method used to run tracking of markers on given sequence and ROIs.*/
-	virtual void RunTracking();
+	virtual void RunTracking(JsonTrackerObject &jsonObject);
 };
 
 class MultiTrackerTLD : public BaseTracker
@@ -127,10 +128,10 @@ public:
 		\param[in] boundingBoxes std::vector<cv::Rect> with selected bounding boxes.
 		\param[in] images std::vector<cv::Mat> with loaded sequence of images.
 	*/
-	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName);
+	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images);
 
 	/*Method used to run tracking of markers on given sequence and ROIs.*/
-	virtual void RunTracking();
+	virtual void RunTracking(JsonTrackerObject &jsonObject);
 };
 
 class MultiTrackerBoosting : public BaseTracker
@@ -140,10 +141,10 @@ public:
 		\param[in] boundingBoxes std::vector<cv::Rect> with selected bounding boxes.
 		\param[in] images std::vector<cv::Mat> with loaded sequence of images.
 	*/
-	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName);
+	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images);
 
 	/*Method used to run tracking of markers on given sequence and ROIs.*/
-	virtual void RunTracking();
+	virtual void RunTracking(JsonTrackerObject &jsonObject);
 };
 
 class MultiTrackerKCF : public BaseTracker
@@ -153,10 +154,10 @@ public:
 		\param[in] boundingBoxes std::vector<cv::Rect> with selected bounding boxes.
 		\param[in] images std::vector<cv::Mat> with loaded sequence of images.
 	*/
-	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName);
+	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images);
 
 	/*Method used to run tracking of markers on given sequence and ROIs.*/
-	virtual void RunTracking();
+	virtual void RunTracking(JsonTrackerObject &jsonObject);
 };
 
 class MultiTrackerMedianFlow : public BaseTracker
@@ -166,8 +167,8 @@ public:
 		\param[in] boundingBoxes std::vector<cv::Rect> with selected bounding boxes.
 		\param[in] images std::vector<cv::Mat> with loaded sequence of images.
 	*/
-	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, std::string sequenceName);
+	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images);
 
 	/*Method used to run tracking of markers on given sequence and ROIs.*/
-	virtual void RunTracking();
+	virtual void RunTracking(JsonTrackerObject &jsonObject);
 };

@@ -22,6 +22,7 @@ namespace BackendWorkerHelpers
 	/*Enum class representing all types of available trackers.*/
 	enum class TrackerType
 	{
+		BlobDetector,
 		MOSSE,
 		CSRT,
 		MIL,
@@ -29,10 +30,10 @@ namespace BackendWorkerHelpers
 		Boosting,
 		KCF,
 		MedianFlow,
-		HoughCircles,
-		BlobDetector,
 		GOTURN,
-		DaSiamRPN
+		DaSiamRPN,
+		HoughCircles,
+		Reference
 	};
 }
 

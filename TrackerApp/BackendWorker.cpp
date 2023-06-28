@@ -124,6 +124,12 @@ Q_INVOKABLE void BackendWorker::RunAllTrackers()
                 tracker->RunTracking(jsonTrackersObject);
             }
                                                                 break;
+            case BackendWorkerHelpers::TrackerType::Reference: {
+                MultiBlobDetectorTrackerReference* tracker(new MultiBlobDetectorTrackerReference);
+                tracker->InitializeTracker(ROIs, sequence);
+                tracker->RunTracking(jsonTrackersObject);
+            }
+                                                                break;
             } 
         }
     }

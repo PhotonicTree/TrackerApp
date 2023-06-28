@@ -184,26 +184,26 @@ void MultiTrackerCSRT::RunTracking(JsonTrackerObject &jsonObject)
     RunTrackingForOpenCVLegacyTracker<cv::legacy::TrackerCSRT>(ROIs, sequence, jsonObject);
 }
 
-void MultiTrackerGOTURN::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)
+void TrackerGOTURN::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)
 {
     this->ROIs = boundingBoxes;
     this->sequence = images;
 }
 
-void MultiTrackerGOTURN::RunTracking(JsonTrackerObject &jsonObject)
+void TrackerGOTURN::RunTracking(JsonTrackerObject &jsonObject)
 {
-//    RunTrackingForOpenCVLegacyTracker
+    RunTrackingForOpenCVTracker<cv::TrackerGOTURN>(ROIs, sequence, jsonObject);
 }
 
-void MultiTrackerDaSiamRPN::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)
+void TrackerDaSiamRPN::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)
 {
     this->ROIs = boundingBoxes;
     this->sequence = images;
 }
 
-void MultiTrackerDaSiamRPN::RunTracking(JsonTrackerObject &jsonObject)
+void TrackerDaSiamRPN::RunTracking(JsonTrackerObject &jsonObject)
 {
-//   RunTrackingForOpenCVLegacyTracker<cv::legacy::TrackerMIL>(ROIs, sequence, jsonObject);
+    RunTrackingForOpenCVTracker<cv::TrackerDaSiamRPN>(ROIs, sequence, jsonObject);
 }
 
 void MultiTrackerTLD::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)

@@ -95,7 +95,7 @@ public:
 	virtual void RunTracking(JsonTrackerObject &jsonObject);
 };
 
-class MultiTrackerGOTURN : public BaseTracker
+class TrackerGOTURN : public BaseTracker
 {
 public:
 	/*Method used to initialize the tracker.
@@ -108,7 +108,7 @@ public:
 	virtual void RunTracking(JsonTrackerObject &jsonObject);
 };
 
-class MultiTrackerDaSiamRPN : public BaseTracker
+class TrackerDaSiamRPN : public BaseTracker
 {
 public:
 	/*Method used to initialize the tracker.
@@ -171,4 +171,3 @@ public:
 
 	/*Method used to run tracking of markers on given sequence and ROIs.*/
 	virtual void RunTracking(JsonTrackerObject &jsonObject);
-};

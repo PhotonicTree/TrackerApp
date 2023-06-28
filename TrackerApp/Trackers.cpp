@@ -3,6 +3,8 @@
 #include <iostream>
 #include <chrono>
 
+#include <opencv2/dnn.hpp>
+
 BaseTracker::BaseTracker()
 {
 }
@@ -82,6 +84,73 @@ template <typename T> void RunTrackingForOpenCVLegacyTracker(std::vector<cv::Rec
     jsonTrackersObject[trackerTypeName]["FPS"] = std::to_string(fps);
 }
 
+template <typename T> void RunTrackingForOpenCVTracker(std::vector<cv::Rect> ROIs, std::vector<cv::Mat> sequence, JsonTrackerObject& jsonTrackersObject)
+{
+    auto tracker = T::create();
+    
+    // Get name of current tracker and push to json file.
+    std::string trackerTypeName = typeid(T).name();
+    trackerTypeName.erase(0, trackerTypeName.find_last_of(':') + 1);
+    auto tik = std::chrono::high_resolution_clock::now();
+    tracker->init(sequence.front(), ROIs.front());
+    for (size_t i = 1; i < sequence.size(); i++)
+    {
+        std::vector<std::array<int, 4>> frameResult;
+        cv::Rect currentRectangle;
+        auto image = sequence.at(i);
+        //cv::Mat show = image.clone();
+        bool updated = tracker->update(image, currentRectangle);
+
+        //cv::rectangle(show, currentRectangle, cv::Scalar(255, 0, 0), 2, 1);
+        std::array<int, 4> boundingBox = { static_cast<int>(currentRectangle.x + currentRectangle.width / 2), static_cast<int>(currentRectangle.y + currentRectangle.height / 2),
+            static_cast<int>(currentRectangle.width), static_cast<int>(currentRectangle.height) };
+        frameResult.push_back(boundingBox);
+
+        // prepare string to json
+        std::string frameResultLine = "";
+        for (auto bBox : frameResult)
+        {
+            if (bBox[0] == 0)
+            {
+                frameResultLine = "(0;0;0;0)";
+                break;
+            }
+            std::string currentRectangle = "(";
+            for (auto number : bBox)
+            {
+                currentRectangle += std::to_string(number);
+
+                if (number != *(bBox.end() - 1))
+                {
+                    currentRectangle += ";";
+                }
+                else
+                {
+                    currentRectangle += ")";
+                }
+            }
+            frameResultLine += currentRectangle;
+            if (bBox != *(frameResult.end() - 1))
+            {
+                frameResultLine += ",";
+            }
+        }
+        size_t n = 4;
+        auto frameNumber = std::to_string(i);
+        int precision = n - std::min(n, frameNumber.size());
+        frameNumber.insert(0, precision, '0');
+        jsonTrackersObject[trackerTypeName][frameNumber] = frameResultLine;
+        std::cout << trackerTypeName << " - " << frameNumber << std::endl;
+        //cv::imshow("Tracker result. Press 'x' to quit", show);
+        //if (cv::waitKey(100) == 27) break;
+    }
+    auto tok = std::chrono::high_resolution_clock::now();
+    auto durationInSeconds = std::chrono::duration_cast<std::chrono::microseconds>(tok - tik).count() / 1000000.0;
+    auto fps = sequence.size() / durationInSeconds;
+    jsonTrackersObject[trackerTypeName]["FPS"] = std::to_string(fps);
+}
+
+
 void MultiTrackerMIL::RunTracking(JsonTrackerObject &jsonObject)
 {
     RunTrackingForOpenCVLegacyTracker<cv::legacy::TrackerMIL>(ROIs, sequence, jsonObject);
@@ -91,7 +160,6 @@ void MultiTrackerMIL::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, st
 { 
     this->ROIs = boundingBoxes;
     this->sequence = images;
-
 }
 
 void MultiTrackerMOSSE::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)

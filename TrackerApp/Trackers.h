@@ -172,3 +172,22 @@ public:
 
 	/*Method used to run tracking of markers on given sequence and ROIs.*/
 	virtual void RunTracking(JsonTrackerObject &jsonObject);
+};
+
+class MultiBlobDetectorTrackerReference : public BaseTracker
+{
+public:
+	/*Method used to initialize the tracker.
+		\param[in] boundingBoxes std::vector<cv::Rect> with selected bounding boxes.
+		\param[in] images std::vector<cv::Mat> with loaded sequence of images.
+		\param[in] radius int value of circle to be drawn around found marker.
+	*/
+	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, int radius = 20);
+
+	/*Method used to run tracking of markers on given sequence and ROIs.*/
+	void RunTracking(JsonTrackerObject& jsonObject) override;
+
+private:
+	cv::SimpleBlobDetector::Params circleBlobDetectorParams;
+	int circleRadius;
+};

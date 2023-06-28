@@ -364,3 +364,72 @@ void MultiBlobDetectorTracker::RunTracking(JsonTrackerObject &jsonObject)
         jsonObject["MultiBlobDetector"][frameNumber] = frameResultLine;
     }
 }
+
+
+void MultiBlobDetectorTrackerReference::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images, int radius)
+{
+    this->ROIs = boundingBoxes;
+    this->sequence = images;
+    this->circleRadius = radius;
+
+    // Filter by intensity (thresholding)
+    circleBlobDetectorParams.thresholdStep = 1;
+    circleBlobDetectorParams.minThreshold = 20;
+    circleBlobDetectorParams.maxThreshold = 150;
+    circleBlobDetectorParams.minRepeatability = 4;
+    circleBlobDetectorParams.minDistBetweenBlobs = 10;
+
+    // Filter by color
+    circleBlobDetectorParams.filterByColor = true;
+    circleBlobDetectorParams.blobColor = 0;
+
+    // Filter by area
+    circleBlobDetectorParams.filterByArea = true;
+    circleBlobDetectorParams.minArea = 180;
+    circleBlobDetectorParams.maxArea = 230;
+
+    // Filter by circularity
+    circleBlobDetectorParams.filterByCircularity = true;
+    circleBlobDetectorParams.minCircularity = 0.60F;
+    circleBlobDetectorParams.maxCircularity = 1.0F;
+
+    // Filter by convexity
+    circleBlobDetectorParams.filterByConvexity = true;
+    circleBlobDetectorParams.minConvexity = 0.8F;
+
+    // Filter by inertia
+    // https://stackoverflow.com/questions/14770756/opencv-simpleblobdetector-filterbyinertia-meaning
+    circleBlobDetectorParams.filterByInertia = true;
+    circleBlobDetectorParams.minInertiaRatio = 0.25F;
+    circleBlobDetectorParams.maxInertiaRatio = 1.01F;
+}
+
+void MultiBlobDetectorTrackerReference::RunTracking(JsonTrackerObject& jsonObject)
+{
+
+    WeightedEdgesExtractor::Parameters parameters;
+    parameters.blobDetectorParameters = circleBlobDetectorParams;
+    for (auto i = 0; i < sequence.size(); ++i)
+    {
+        WeightedEdgesExtractor* weightedEdgesExtractor = new WeightedEdgesExtractor(parameters);
+        auto refinedMarkersCenters = weightedEdgesExtractor->DetectMarkerCenters(sequence.at(i), cv::Size2i(20, 20));
+
+        std::string frameResultLine = "";
+        if (!refinedMarkersCenters.empty())
+        {
+            for (const auto center : refinedMarkersCenters)
+            {
+                frameResultLine += "(" + std::to_string(center.x) + ";" + std::to_string(center.y) + "),";
+            }
+        }
+        else
+        {
+            frameResultLine += "(0;0)";
+        }
+        size_t n = 4;
+        auto frameNumber = std::to_string(i);
+        int precision = n - std::min(n, frameNumber.size());
+        frameNumber.insert(0, precision, '0');
+        jsonObject["WeightedEdgesExtractor"][frameNumber] = frameResultLine;
+    }
+}

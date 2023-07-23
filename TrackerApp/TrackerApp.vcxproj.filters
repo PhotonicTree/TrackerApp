@@ -46,6 +46,9 @@
     <ClCompile Include="JsonTrackerObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="WeightedEdgesExtractor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="FrameImageProvider.h">
@@ -69,6 +72,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="JsonTrackerObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WeightedEdgesExtractor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -13,8 +13,8 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{9768097A-D627-437D-BAEB-E11D5751C6C3}</ProjectGuid>
     <Keyword>QtVS_v304</Keyword>
-    <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">10.0.19041.0</WindowsTargetPlatformVersion>
-    <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">10.0.19041.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">10.0.18362.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">10.0.18362.0</WindowsTargetPlatformVersion>
     <QtMsBuild Condition="'$(QtMsBuild)'=='' OR !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -31,12 +31,13 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
-    <QtInstall>msvc2017_64</QtInstall>
+    <QtInstall>5.14.1_msvc2017_64</QtInstall>
     <QtModules>quick</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
+    <QtPlugin>true</QtPlugin>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
-    <QtInstall>msvc2017_64</QtInstall>
+    <QtInstall>C:\Qt\Qt5.14.1\5.14.1\msvc2017_64</QtInstall>
     <QtModules>quick</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
@@ -55,16 +56,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <IncludePath>C:\Mnemosis\OpenCV\build\install\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Mnemosis\OpenCV\build\install\x64\vc16\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\OpenCV\Build\install\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\OpenCV\Build\install\x64\vc16\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <IncludePath>C:\Mnemosis\OpenCV\build\install\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Mnemosis\OpenCV\build\install\x64\vc16\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\OpenCV\OpenCVBuild\install\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\OpenCV\OpenCVBuild\install\x64\vc16\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>
-      <AdditionalDependencies>opencv_world455d.lib;opencv_world455.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opencv_world470d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ClCompile>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -109,6 +110,7 @@
     <ClCompile Include="JsonTrackerObject.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Trackers.cpp" />
+    <ClCompile Include="WeightedEdgesExtractor.cpp" />
     <QtRcc Include="qml.qrc" />
     <None Include="main.qml" />
   </ItemGroup>
@@ -124,6 +126,7 @@
     <ClInclude Include="json.hpp" />
     <ClInclude Include="JsonTrackerObject.h" />
     <ClInclude Include="Trackers.h" />
+    <ClInclude Include="WeightedEdgesExtractor.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

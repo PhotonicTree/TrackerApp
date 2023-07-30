@@ -60,8 +60,8 @@
     <LibraryPath>C:\OpenCV\Build\install\x64\vc16\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <IncludePath>C:\OpenCV\OpenCVBuild\install\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\OpenCV\OpenCVBuild\install\x64\vc16\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\OpenCV\Build\install\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\OpenCV\Build\install\x64\vc16\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>
@@ -73,7 +73,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Link>
-      <AdditionalDependencies>opencv_world455.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opencv_world470.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">

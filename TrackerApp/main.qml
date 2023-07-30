@@ -70,6 +70,11 @@ Window {
                 Layout.alignment: Qt.AlignRight
                 
                 Switch {
+                    id: trackerBlobDetectorSwitch
+                    text: "SimpleBlobDetector"
+                }
+
+                Switch {
                     id: trackerMOSSESwitch
                     text: "MOSSE"
                 }

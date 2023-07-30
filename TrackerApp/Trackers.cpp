@@ -206,6 +206,17 @@ void TrackerDaSiamRPN::RunTracking(JsonTrackerObject &jsonObject)
     RunTrackingForOpenCVTracker<cv::TrackerDaSiamRPN>(ROIs, sequence, jsonObject);
 }
 
+void TrackerNanoWrapper::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)
+{
+    this->ROIs = boundingBoxes;
+    this->sequence = images;
+}
+
+void TrackerNanoWrapper::RunTracking(JsonTrackerObject& jsonObject)
+{
+    RunTrackingForOpenCVTracker<cv::TrackerNano>(ROIs, sequence, jsonObject);
+}
+
 void MultiTrackerTLD::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)
 {
     this->ROIs = boundingBoxes;

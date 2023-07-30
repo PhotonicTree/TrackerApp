@@ -76,18 +76,24 @@ Q_INVOKABLE void BackendWorker::RunAllTrackers()
                 tracker->RunTracking(jsonTrackersObject);
             }
                                                          break;
-            /*case BackendWorkerHelpers::TrackerType::DaSiamRPN: {
-                MultiTrackerMIL* tracker(new MultiTrackerMIL);
+            case BackendWorkerHelpers::TrackerType::DaSiamRPN: {
+                TrackerDaSiamRPNWrapper* tracker(new TrackerDaSiamRPNWrapper);
                 tracker->InitializeTracker(ROIs, sequence);
-                tracker->RunTracking();
+                tracker->RunTracking(jsonTrackersObject);
             }
-                break; */
-                /*case BackendWorkerHelpers::TrackerType::GOTURN: {
-                    MultiTrackerMIL* tracker(new MultiTrackerMIL);
-                    tracker->InitializeTracker(ROIs, sequence);
-                    tracker->RunTracking();
-                }
-                    break; */
+                                                         break; 
+            case BackendWorkerHelpers::TrackerType::GOTURN: {
+                TrackerGOTURNWrapper* tracker(new TrackerGOTURNWrapper);
+                tracker->InitializeTracker(ROIs, sequence);
+                tracker->RunTracking(jsonTrackersObject);
+            }
+                                                        break;
+            case BackendWorkerHelpers::TrackerType::NANO: {
+                TrackerNanoWrapper* tracker(new TrackerNanoWrapper);
+                tracker->InitializeTracker(ROIs, sequence);
+                tracker->RunTracking(jsonTrackersObject);
+            }
+                                                          break;
             case BackendWorkerHelpers::TrackerType::MIL: {
                 MultiTrackerMIL* tracker(new MultiTrackerMIL);
                 tracker->InitializeTracker(ROIs, sequence);

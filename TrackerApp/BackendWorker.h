@@ -32,6 +32,7 @@ namespace BackendWorkerHelpers
 		MedianFlow,
 		GOTURN,
 		DaSiamRPN,
+		NANO,
 		HoughCircles,
 		Reference
 	};

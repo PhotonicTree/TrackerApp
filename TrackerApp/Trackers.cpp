@@ -42,7 +42,7 @@ template <typename T> void RunTrackingForOpenCVLegacyTracker(std::vector<cv::Rec
 
         // prepare string to json
         std::string frameResultLine = "";
-        for (auto bBox : frameResult)
+        for (const auto& bBox : frameResult)
         {
             if (bBox[0] == 0)
             {
@@ -184,24 +184,24 @@ void MultiTrackerCSRT::RunTracking(JsonTrackerObject &jsonObject)
     RunTrackingForOpenCVLegacyTracker<cv::legacy::TrackerCSRT>(ROIs, sequence, jsonObject);
 }
 
-void TrackerGOTURN::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)
+void TrackerGOTURNWrapper::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)
 {
     this->ROIs = boundingBoxes;
     this->sequence = images;
 }
 
-void TrackerGOTURN::RunTracking(JsonTrackerObject &jsonObject)
+void TrackerGOTURNWrapper::RunTracking(JsonTrackerObject &jsonObject)
 {
     RunTrackingForOpenCVTracker<cv::TrackerGOTURN>(ROIs, sequence, jsonObject);
 }
 
-void TrackerDaSiamRPN::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)
+void TrackerDaSiamRPNWrapper::InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images)
 {
     this->ROIs = boundingBoxes;
     this->sequence = images;
 }
 
-void TrackerDaSiamRPN::RunTracking(JsonTrackerObject &jsonObject)
+void TrackerDaSiamRPNWrapper::RunTracking(JsonTrackerObject &jsonObject)
 {
     RunTrackingForOpenCVTracker<cv::TrackerDaSiamRPN>(ROIs, sequence, jsonObject);
 }
@@ -318,7 +318,7 @@ void MultiBlobDetectorTracker::InitializeTracker(std::vector<cv::Rect>& bounding
 
     // Filter by area
     circleBlobDetectorParams.filterByArea = true;
-    circleBlobDetectorParams.minArea = 700;
+    circleBlobDetectorParams.minArea = 100;
     circleBlobDetectorParams.maxArea = 1500;
 
     // Filter by circularity
@@ -344,6 +344,7 @@ void MultiBlobDetectorTracker::RunTracking(JsonTrackerObject &jsonObject)
     for (auto i = 0; i < sequence.size(); ++i)
     {
         auto image = sequence.at(i);
+        //cv::Mat show = image.clone();
         std::string frameResultLine = "";
         blobDetector->detect(image, keypoints.at(i));
 
@@ -353,10 +354,10 @@ void MultiBlobDetectorTracker::RunTracking(JsonTrackerObject &jsonObject)
             {
                 cv::Point center(cvRound(keypoints.at(i).at(j).pt.x), cvRound(keypoints.at(i).at(j).pt.y));
                 // draw the circle center
-                cv::circle(image, center, 3, cv::Scalar(0, 255, 0), -1, 8, 0);
-                // draw the circle outline
-                circle(image, center, circleRadius, cv::Scalar(0, 0, 255), 3, 8, 0);
-                cv::putText(image, cv::String(std::to_string(j)), center, cv::FONT_HERSHEY_SIMPLEX, 0.8, cv::Scalar(255, 255, 255), 2);
+              // cv::circle(show, center, 3, cv::Scalar(0, 255, 0), -1, 8, 0);
+              // // draw the circle outline
+              // circle(show, center, circleRadius, cv::Scalar(0, 0, 255), 3, 8, 0);
+              // cv::putText(show, cv::String(std::to_string(j)), center, cv::FONT_HERSHEY_SIMPLEX, 0.8, cv::Scalar(255, 255, 255), 2);
 
                 frameResultLine += "(" + std::to_string(center.x) + ";" + std::to_string(center.y) + "),";
             }
@@ -366,13 +367,14 @@ void MultiBlobDetectorTracker::RunTracking(JsonTrackerObject &jsonObject)
             frameResultLine += "(0;0)";
         }
    
-        cv::imshow("Tracker result. Press 'x' to quit", image);
+       // cv::imshow("Tracker result. Press 'x' to quit", show);
         if (cv::waitKey(100) == 27) break;
         size_t n = 4;
         auto frameNumber = std::to_string(i);
         int precision = n - std::min(n, frameNumber.size());
         frameNumber.insert(0, precision, '0');
         jsonObject["MultiBlobDetector"][frameNumber] = frameResultLine;
+        std::cout << "MultiBlobDetector" << " - " << frameNumber << std::endl;
     }
 }
 
@@ -442,5 +444,6 @@ void MultiBlobDetectorTrackerReference::RunTracking(JsonTrackerObject& jsonObjec
         int precision = n - std::min(n, frameNumber.size());
         frameNumber.insert(0, precision, '0');
         jsonObject["WeightedEdgesExtractor"][frameNumber] = frameResultLine;
+        std::cout << "WeightedEdgesExtractor" << " - " << frameNumber << std::endl;
     }
 }

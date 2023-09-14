@@ -96,7 +96,7 @@ public:
 	virtual void RunTracking(JsonTrackerObject &jsonObject);
 };
 
-class TrackerGOTURN : public BaseTracker
+class TrackerGOTURNWrapper : public BaseTracker
 {
 public:
 	/*Method used to initialize the tracker.
@@ -109,7 +109,7 @@ public:
 	virtual void RunTracking(JsonTrackerObject &jsonObject);
 };
 
-class TrackerDaSiamRPN : public BaseTracker
+class TrackerDaSiamRPNWrapper : public BaseTracker
 {
 public:
 	/*Method used to initialize the tracker.
@@ -120,6 +120,19 @@ public:
 
 	/*Method used to run tracking of markers on given sequence and ROIs.*/
 	virtual void RunTracking(JsonTrackerObject &jsonObject);
+};
+
+class TrackerNanoWrapper : public BaseTracker
+{
+public:
+	/*Method used to initialize the tracker.
+		\param[in] boundingBoxes std::vector<cv::Rect> with selected bounding boxes.
+		\param[in] images std::vector<cv::Mat> with loaded sequence of images.
+	*/
+	void InitializeTracker(std::vector<cv::Rect>& boundingBoxes, std::vector<cv::Mat>& images);
+
+	/*Method used to run tracking of markers on given sequence and ROIs.*/
+	virtual void RunTracking(JsonTrackerObject& jsonObject);
 };
 
 class MultiTrackerTLD : public BaseTracker

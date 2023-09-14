@@ -8,7 +8,9 @@ Q_INVOKABLE void BackendWorker::ImportSequence(const QString& path)
     sequence.clear();
 	const auto sequencePath = path.toStdString();
 	videoCapture.open(sequencePath);
-    sequenceName = sequencePath.substr(sequencePath.find_last_of("/\\") + 1);
+    std::string directory = sequencePath.substr(0, sequencePath.find_last_of("/\\"));
+    std::string fileName = sequencePath.substr(sequencePath.find_last_of("/\\") + 1);
+    sequenceName = directory.substr(directory.find_last_of("/\\") + 1) + "/" + fileName;
     if (!videoCapture.isOpened()) {
         std::cout << "Error opening video stream or file!" << std::endl;
         emit importingFailed();
@@ -139,8 +141,8 @@ Q_INVOKABLE void BackendWorker::RunAllTrackers()
             } 
         }
     }
-    std::ofstream exportJSONFile("Results\\" + outputFileName);
+    std::ofstream exportJSONFile("Results/" + outputFileName);
     exportJSONFile << jsonTrackersObject.dump(4);
     exportJSONFile.close();
-    std::cout << "File exported";
+    std::cout << "File exported to " << "Results/" + outputFileName << std::endl;
 }

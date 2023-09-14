@@ -108,27 +108,35 @@ Window {
                     id: trackerMedianFlowSwitch
                     text: "MedianFlow"
                 }
+
+
+                 Switch {
+                    id: trackerGOTURNSwitch
+                    text: "GOTURN"
+                    //enabled: false
+                }
                 
+                Switch {
+                    id: trackerDaSiamRPNSwitch
+                    text: "DaSiamRPN"
+                    //enabled: false
+                }
+
+                Switch {
+                    id: trackerNanoSwitch
+                    text: "Nano"
+                    //enabled: false
+                }
+
                 Switch {
                     id: trackerHoughCirclesSwitch
                     text: "HoughCircles"
                 }
 
                 Switch {
-                    id: trackerBlobDetectorSwitch
-                    text: "SimpleBlobDetector"
-                }
-
-                 Switch {
-                    id: trackerGOTURNSwitch
-                    text: "GOTURN"
-                    enabled: false
-                }
-                
-                Switch {
-                    id: trackerDaSiamRPNSwitch
-                    text: "DaSiamRPN"
-                    enabled: false
+                    id: trackerReferenceSwitch
+                    text: "Reference"
+                    //enabled: false
                 }
             }
 
@@ -139,6 +147,7 @@ Window {
                     Layout.alignment: Qt.AlignBottom | Qt.AlignRight
                     text: "Run Tracking For Selected Trackers"
                     onClicked: {
+                        getAllSelectedTrackers();
                         backendController.startImporting(path.text);
                     }
                 }
@@ -189,7 +198,7 @@ Window {
         
         function onImportingFinished()
         {
-            getAllSelectedTrackers();
+            backendWorker.RunAllTrackers();
         }
     }
 
@@ -235,7 +244,6 @@ Window {
         if (anySelected)
         {
             backendWorker.GetSelectedTrackers(switchesStatus);
-            backendWorker.RunAllTrackers();
         } else
         {
           var errorPopup = Qt.createQmlObject('

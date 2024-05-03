@@ -108,6 +108,12 @@ Q_INVOKABLE void BackendWorker::RunAllTrackers()
                 tracker->RunTracking(jsonTrackersObject);
             }
                                                               break;
+            case BackendWorkerHelpers::TrackerType::TLD: {
+                MultiTrackerTLD* tracker(new MultiTrackerTLD);
+                tracker->InitializeTracker(ROIs, sequence);
+                tracker->RunTracking(jsonTrackersObject);
+            }
+                                                              break;
             case BackendWorkerHelpers::TrackerType::KCF: {
                 MultiTrackerKCF* tracker(new MultiTrackerKCF);
                 tracker->InitializeTracker(ROIs, sequence);

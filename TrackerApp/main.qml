@@ -72,60 +72,68 @@ Window {
                 Switch {
                     id: trackerBlobDetectorSwitch
                     text: "SimpleBlobDetector"
+                    checked: true
                 }
 
                 Switch {
                     id: trackerMOSSESwitch
                     text: "MOSSE"
+                    checked: true
                 }
                 
                 Switch {
                     id: trackerCSRTSwitch
                     text: "CSRT"
+                    checked: true
                 }
                 
                 Switch {
                     id: trackerMILSwitch
                     text: "MIL"
+                    checked: true
                 }
                 
                 Switch {
                     id: trackerTLDSwitch
                     text: "TLD"
+                    checked: true
                 }
                 
                 Switch {
                     id: trackerBoostingSwitch
                     text: "Boosting"
+                    checked: true
                 }
                 
                 Switch {
                     id: trackerKCFSwitch
                     text: "KCF"
+                    checked: true
                 }
                 
                 Switch {
                     id: trackerMedianFlowSwitch
                     text: "MedianFlow"
+                    checked: true
                 }
 
 
                  Switch {
                     id: trackerGOTURNSwitch
                     text: "GOTURN"
-                    //enabled: false
+                    checked: true
                 }
                 
                 Switch {
                     id: trackerDaSiamRPNSwitch
                     text: "DaSiamRPN"
-                    //enabled: false
+                    checked: true
                 }
 
                 Switch {
                     id: trackerNanoSwitch
                     text: "Nano"
-                    //enabled: false
+                    checked: true
                 }
 
                 Switch {
@@ -136,7 +144,6 @@ Window {
                 Switch {
                     id: trackerReferenceSwitch
                     text: "Reference"
-                    //enabled: false
                 }
             }
 

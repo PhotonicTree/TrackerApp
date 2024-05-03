@@ -23,14 +23,17 @@ template <typename T> void RunTrackingForOpenCVLegacyTracker(std::vector<cv::Rec
     // Get name of current tracker and push to json file.
     std::string trackerTypeName = typeid(T).name();
     trackerTypeName.erase(0, trackerTypeName.find_last_of(':') + 1);
-    auto tik = std::chrono::high_resolution_clock::now();
+    
+    long long timeCount = 0;
     for (size_t i = 1; i < sequence.size(); i++)
     {
         std::vector<std::array<int, 4>> frameResult;
         auto image = sequence.at(i);
         cv::Mat show = image.clone();
+        auto tik = std::chrono::high_resolution_clock::now();
         multiTracker->update(image);
         auto& trackerObjects = multiTracker->getObjects();
+        timeCount += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - tik).count();
         for (size_t j = 0; j < trackerObjects.size(); j++)
         {
             auto trackerObject = trackerObjects[j];
@@ -53,7 +56,7 @@ template <typename T> void RunTrackingForOpenCVLegacyTracker(std::vector<cv::Rec
             for (auto number : bBox)
             {
                 currentRectangle += std::to_string(number);
-
+        
                 if (number != *(bBox.end() - 1))
                 {
                    currentRectangle += ";";
@@ -76,10 +79,11 @@ template <typename T> void RunTrackingForOpenCVLegacyTracker(std::vector<cv::Rec
         jsonTrackersObject[trackerTypeName][frameNumber] = frameResultLine;
         std::cout << trackerTypeName << " - " << frameNumber << std::endl;
         cv::imshow("Tracker result. Press 'x' to quit", show);
-        if (cv::waitKey(100) == 27) break;
+        if (cv::waitKey(1) == 27) break;
     }
-    auto tok = std::chrono::high_resolution_clock::now();
-    auto durationInSeconds = std::chrono::duration_cast<std::chrono::microseconds>(tok - tik).count() / 1000000.0;
+
+    auto durationInSeconds = timeCount / 1000000.0;
+    std::cout << trackerTypeName << " time " << durationInSeconds << std::endl;
     auto fps = sequence.size() / durationInSeconds;
     jsonTrackersObject[trackerTypeName]["FPS"] = std::to_string(fps);
 }
@@ -91,17 +95,18 @@ template <typename T> void RunTrackingForOpenCVTracker(std::vector<cv::Rect> ROI
     // Get name of current tracker and push to json file.
     std::string trackerTypeName = typeid(T).name();
     trackerTypeName.erase(0, trackerTypeName.find_last_of(':') + 1);
-    auto tik = std::chrono::high_resolution_clock::now();
+    long long timeCount = 0;
     tracker->init(sequence.front(), ROIs.front());
     for (size_t i = 1; i < sequence.size(); i++)
     {
         std::vector<std::array<int, 4>> frameResult;
         cv::Rect currentRectangle;
         auto image = sequence.at(i);
-        //cv::Mat show = image.clone();
+        cv::Mat show = image.clone();
+        auto tik = std::chrono::high_resolution_clock::now();
         bool updated = tracker->update(image, currentRectangle);
-
-        //cv::rectangle(show, currentRectangle, cv::Scalar(255, 0, 0), 2, 1);
+        timeCount += std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - tik).count();
+        cv::rectangle(show, currentRectangle, cv::Scalar(255, 0, 0), 2, 1);
         std::array<int, 4> boundingBox = { static_cast<int>(currentRectangle.x + currentRectangle.width / 2), static_cast<int>(currentRectangle.y + currentRectangle.height / 2),
             static_cast<int>(currentRectangle.width), static_cast<int>(currentRectangle.height) };
         frameResult.push_back(boundingBox);
@@ -119,7 +124,7 @@ template <typename T> void RunTrackingForOpenCVTracker(std::vector<cv::Rect> ROI
             for (auto number : bBox)
             {
                 currentRectangle += std::to_string(number);
-
+        
                 if (number != *(bBox.end() - 1))
                 {
                     currentRectangle += ";";
@@ -141,11 +146,11 @@ template <typename T> void RunTrackingForOpenCVTracker(std::vector<cv::Rect> ROI
         frameNumber.insert(0, precision, '0');
         jsonTrackersObject[trackerTypeName][frameNumber] = frameResultLine;
         std::cout << trackerTypeName << " - " << frameNumber << std::endl;
-        //cv::imshow("Tracker result. Press 'x' to quit", show);
-        //if (cv::waitKey(100) == 27) break;
+        cv::imshow("Tracker result. Press 'x' to quit", show);
+        if (cv::waitKey(1) == 27) break;
     }
-    auto tok = std::chrono::high_resolution_clock::now();
-    auto durationInSeconds = std::chrono::duration_cast<std::chrono::microseconds>(tok - tik).count() / 1000000.0;
+
+    auto durationInSeconds = timeCount / 1000000.0;
     auto fps = sequence.size() / durationInSeconds;
     jsonTrackersObject[trackerTypeName]["FPS"] = std::to_string(fps);
 }
@@ -344,7 +349,7 @@ void MultiBlobDetectorTracker::RunTracking(JsonTrackerObject &jsonObject)
     for (auto i = 0; i < sequence.size(); ++i)
     {
         auto image = sequence.at(i);
-        //cv::Mat show = image.clone();
+        cv::Mat show = image.clone();
         std::string frameResultLine = "";
         blobDetector->detect(image, keypoints.at(i));
 
@@ -354,10 +359,10 @@ void MultiBlobDetectorTracker::RunTracking(JsonTrackerObject &jsonObject)
             {
                 cv::Point center(cvRound(keypoints.at(i).at(j).pt.x), cvRound(keypoints.at(i).at(j).pt.y));
                 // draw the circle center
-              // cv::circle(show, center, 3, cv::Scalar(0, 255, 0), -1, 8, 0);
-              // // draw the circle outline
-              // circle(show, center, circleRadius, cv::Scalar(0, 0, 255), 3, 8, 0);
-              // cv::putText(show, cv::String(std::to_string(j)), center, cv::FONT_HERSHEY_SIMPLEX, 0.8, cv::Scalar(255, 255, 255), 2);
+                cv::circle(show, center, 3, cv::Scalar(0, 255, 0), -1, 8, 0);
+                // draw the circle outline
+                circle(show, center, circleRadius, cv::Scalar(0, 0, 255), 3, 8, 0);
+                cv::putText(show, cv::String(std::to_string(j)), center, cv::FONT_HERSHEY_SIMPLEX, 0.8, cv::Scalar(255, 255, 255), 2);
 
                 frameResultLine += "(" + std::to_string(center.x) + ";" + std::to_string(center.y) + "),";
             }
@@ -367,8 +372,8 @@ void MultiBlobDetectorTracker::RunTracking(JsonTrackerObject &jsonObject)
             frameResultLine += "(0;0)";
         }
    
-       // cv::imshow("Tracker result. Press 'x' to quit", show);
-        if (cv::waitKey(100) == 27) break;
+        cv::imshow("Tracker result. Press 'x' to quit", show);
+        if (cv::waitKey(1) == 27) break;
         size_t n = 4;
         auto frameNumber = std::to_string(i);
         int precision = n - std::min(n, frameNumber.size());

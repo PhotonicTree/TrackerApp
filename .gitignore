@@ -9,3 +9,4 @@ TrackerApp/build
 TrackerApp/.vscode
 TrackerApp/Results
 *.log
+*.csv

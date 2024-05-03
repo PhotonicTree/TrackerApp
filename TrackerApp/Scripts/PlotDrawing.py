@@ -2,11 +2,16 @@ import json
 import matplotlib.pyplot as plt
 import math
 from os import makedirs as make_dir
+import cv2
 
 TRACKERS = ["TrackerMOSSE","TrackerBoosting", "TrackerCSRT", "TrackerKCF", "TrackerMIL", "TrackerMedianFlow"]
 xy_detected = {}
 x_detected = {}
 y_detected = {}
+
+screen_width = 1920
+screen_height = 1080
+
 # Load the JSON file
 filename = "Results/KonradTest.json"
 with open(filename) as json_file:
@@ -44,7 +49,9 @@ with open(filename) as json_file:
         xy_tracked = {}
         x_tracked = {}
         y_tracked = {}
+        cap = cv2.VideoCapture(video_file)
         for frame_number , fr in zip(tracker, xy_detected):
+            ret, frame = cap.read()
             if(frame_number != 'FPS'):
                 frame_number_converted = int(frame_number)
                 #splited_tracker = tracker[frame_number].split(",")
@@ -64,7 +71,16 @@ with open(filename) as json_file:
                     distance[frame_number_converted] = distance[frame_number_converted - 1]
                     x_tracked[frame_number_converted] = xy_tracked[frame_number_converted - 1][0]
                     y_tracked[frame_number_converted] = xy_tracked[frame_number_converted - 1][1]
-
+            cv2.circle(frame, (x_tracked[frame_number_converted], y_tracked[frame_number_converted]), 5, (0, 0, 255), -1)  # Draw a red dot
+            frame_width = int(frame.shape[1])
+            frame_height = int(frame.shape[0])
+            if (frame_height > screen_height):
+                new_width = int(screen_height / frame_height * frame_width)
+                frame = cv2.resize(frame, (new_width, screen_height))
+        
+            cv2.imshow('Frame', frame)
+            if cv2.waitKey(25) & 0xFF == ord('q'):
+                quit()
         folder = filename.split('.')[0]
         try:
             make_dir(folder)
@@ -102,5 +118,3 @@ with open(filename) as json_file:
         plotname = folder + '/' + tracker_name + "_xvals.png"
         plt.savefig(plotname, dpi=500)
         
-
-

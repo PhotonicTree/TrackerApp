@@ -46,7 +46,7 @@ public:
 	explicit WeightedEdgesExtractor(
 		const Parameters& parameters);
 
-	std::vector<cv::Point2i> DetectMarkerCenters(
+	std::vector<cv::Point2d> DetectMarkerCenters(
 		const cv::Mat& image, 
 		const cv::Size2i& patternSize);
 
@@ -58,7 +58,7 @@ protected:
 	\param[in] coarseCenter Center of a marker in global image coordinates computed by WeightedEdgesExtractor::DetectMarkersCoarse.
 	\returns Wrapped variables of refined center of a marker in global coordinates, total calculated weight and total center replacement.
 */
-	cv::Point2i RefineCenterByWeights(
+	cv::Point2d RefineCenterByWeights(
 		const cv::Mat& image,
 		const cv::Mat& edges,
 		const cv::Point2d& offset,

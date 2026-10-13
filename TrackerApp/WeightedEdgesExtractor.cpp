@@ -21,18 +21,18 @@ WeightedEdgesExtractor::WeightedEdgesExtractor(
 	this->parameters = parameters;
 }
 
-std::vector<cv::Point2i> WeightedEdgesExtractor::DetectMarkerCenters(
+std::vector<cv::Point2d> WeightedEdgesExtractor::DetectMarkerCenters(
 	const cv::Mat& image, 
 	const cv::Size2i& patternSize)
 {
 	if (image.empty())
 	{
-		return std::vector<cv::Point2i>();
+		return std::vector<cv::Point2d>();
 	}
 
 	if (patternSize.width <= 0 || patternSize.height <= 0)
 	{
-		return std::vector<cv::Point2i>();
+		return std::vector<cv::Point2d>();
 	}
 
 	// Convert to grayscale if necessary
@@ -56,7 +56,7 @@ std::vector<cv::Point2i> WeightedEdgesExtractor::DetectMarkerCenters(
 	cv::Mat mask;
 	if (!DetectMarkersCoarse(grayscale, patternSize, coarseCenters, mask))
 	{
-		return std::vector<cv::Point2i>();
+		return std::vector<cv::Point2d>();
 	}
 	
 	int differentialBinarizationSize = parameters.differentialBinarizationSize;
@@ -68,17 +68,20 @@ std::vector<cv::Point2i> WeightedEdgesExtractor::DetectMarkerCenters(
 	}
 	if (parameters.differentialBinarizationThreshold < 0)
 	{
-		differentialBinarizationThreshold = CalculateThresholdForEdgeExtraction(image, differentialBinarizationSize, parameters.blurSize);
+		/*The threshold governs binarisation of `grayscale`, so it is derived from that image.
+			Histogramming the raw BGR frame would use only its blue channel (calcHist with channel
+			index 0), the lowest-contrast channel on skin.*/
+		differentialBinarizationThreshold = CalculateThresholdForEdgeExtraction(grayscale, differentialBinarizationSize, parameters.blurSize);
 	}
 	
 	cv::Mat binarizedImage;
 	if (!DoDifferentalBinarization(grayscale, binarizedImage, differentialBinarizationSize, differentialBinarizationThreshold))
 	{
-		return std::vector<cv::Point2i>();
+		return std::vector<cv::Point2d>();
 	}
 	cv::bitwise_and(mask, binarizedImage, binarizedImage);
 
-	std::vector<cv::Point2i> refinedCenters(coarseCenters.size());
+	std::vector<cv::Point2d> refinedCenters(coarseCenters.size());
 	std::vector<std::vector<cv::Point>> contours;
 	
 	cv::findContours(binarizedImage, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
@@ -94,6 +97,12 @@ std::vector<cv::Point2i> WeightedEdgesExtractor::DetectMarkerCenters(
 		boundingRectangle.y -= offset;
 		boundingRectangle.width += 2 * offset;
 		boundingRectangle.height += 2 * offset;
+		// A contour touching the frame border would otherwise extend past it.
+		boundingRectangle &= cv::Rect(0, 0, grayscale.cols, grayscale.rows);
+		if (boundingRectangle.area() <= 0)
+		{
+			continue;
+		}
 
 		size_t matchingCenterIndex = 0;
 		bool matchingCenterIndexFound = false;
@@ -118,7 +127,7 @@ std::vector<cv::Point2i> WeightedEdgesExtractor::DetectMarkerCenters(
 			}
 			catch (const std::exception& exception)
 			{
-				std::cout<<("Exception occurred: {}", exception.what());
+				std::cout << "Exception occurred: " << exception.what() << std::endl;
 			}
 			
 		}
@@ -208,9 +217,11 @@ bool WeightedEdgesExtractor::DoDifferentalBinarization(
 			intensityDifference = 0.0;
 			originalIntensity = static_cast<double>(image.ptr(i)[j]);
 
-			for (int ii = -kernelSize; ii < kernelSize; ++ii)
+			/*Bounds are inclusive so the neighbourhood is centred on the pixel and matches the
+				(2k+1)^2 normalisation used to derive the threshold.*/
+			for (int ii = -kernelSize; ii <= kernelSize; ++ii)
 			{
-				for (int jj = -kernelSize; jj < kernelSize; ++jj)
+				for (int jj = -kernelSize; jj <= kernelSize; ++jj)
 				{
 					distance = static_cast<int>(static_cast<uint64_t>(0.5) + static_cast<uint64_t>(ii) * static_cast<uint64_t>(ii) + static_cast<uint64_t>(jj) * static_cast<uint64_t>(jj));
 
@@ -269,7 +280,7 @@ bool WeightedEdgesExtractor::DetectMarkersCoarse(
 	return true;
 }
 
-cv::Point2i WeightedEdgesExtractor::RefineCenterByWeights(
+cv::Point2d WeightedEdgesExtractor::RefineCenterByWeights(
 	const cv::Mat& grayscaleImage,
 	const cv::Mat& binaryImage,
 	const cv::Point2d& offset,
@@ -286,9 +297,10 @@ cv::Point2i WeightedEdgesExtractor::RefineCenterByWeights(
 	double weightedSumX = 0;
 	double weightedSumY = 0;
 
-	for (int x = 0; x < binaryImage.cols - 1; ++x)
+	// Full patch: excluding the last row and column biased the centroid toward the top-left.
+	for (int x = 0; x < binaryImage.cols; ++x)
 	{
-		for (int y = 0; y < binaryImage.rows - 1; ++y)
+		for (int y = 0; y < binaryImage.rows; ++y)
 		{
 			if (!binaryImage.at<uchar>(y, x) == edgeValue)
 			{
@@ -301,11 +313,14 @@ cv::Point2i WeightedEdgesExtractor::RefineCenterByWeights(
 			}
 		}
 	}
-	cv::Point2i refinedCenter(0, 0);
-	auto aa = (weightedSumX / totalWeight);
-	refinedCenter.x = std::round(weightedSumX / totalWeight);
-	refinedCenter.y = std::round(weightedSumY / totalWeight);
-	refinedCenter.x += std::round(offset.x);
-	refinedCenter.y += std::round(offset.y);
-	return refinedCenter;
+	/*The weighted centroid above is computed in double and returned unrounded: it is the
+		sub-pixel estimate the method exists to provide. offset is boundingRectangle.tl(), an
+		exact integer point.*/
+	if (totalWeight <= 0.0)
+	{
+		// No edge pixels contributed; fall back to the coarse centre rather than dividing by zero.
+		return coarseCenter;
+	}
+	return cv::Point2d(weightedSumX / totalWeight + offset.x,
+		weightedSumY / totalWeight + offset.y);
 }

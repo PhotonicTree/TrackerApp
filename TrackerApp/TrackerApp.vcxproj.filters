@@ -49,6 +49,9 @@
     <ClCompile Include="WeightedEdgesExtractor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MarkerBoxes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="FrameImageProvider.h">
@@ -75,6 +78,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WeightedEdgesExtractor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MarkerBoxes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

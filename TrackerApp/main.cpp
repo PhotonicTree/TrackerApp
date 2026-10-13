@@ -1,4 +1,10 @@
-#include <QGuiApplication>
+/*Qt.labs.platform's FileDialog uses a native (portal/GTK) dialog where one exists and
+    otherwise falls back to its Qt Widgets implementation, which requires QApplication
+    rather than QGuiApplication. WSLg provides no native backend, so the fallback is the
+    one that runs there. QApplication is a drop-in superset of QGuiApplication, so this
+    remains correct on Windows, where the native dialog is still used.*/
+#include <QApplication>
+#include <opencv2/core.hpp>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QQuickImageProvider>
@@ -15,7 +21,12 @@ int main(int argc, char *argv[])
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
 
-    QGuiApplication app(argc, argv);
+    /*Benchmarks run single-threaded to isolate algorithmic cost from hardware parallelism.
+        Constraining the application to one Qt worker thread is not enough for that: OpenCV's
+        internal cv::parallel_for_ and the DNN module keep their own thread pools.*/
+    cv::setNumThreads(1);
+
+    QApplication app(argc, argv);
     QQmlApplicationEngine engine;
 
     BackendWorker* backendWorker(new BackendWorker);

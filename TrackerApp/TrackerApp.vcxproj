@@ -32,13 +32,13 @@
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
     <QtInstall>5.14.1_msvc2017_64</QtInstall>
-    <QtModules>quick</QtModules>
+    <QtModules>quick;widgets</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
     <QtPlugin>true</QtPlugin>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
     <QtInstall>C:\Qt\Qt5.14.1\5.14.1\msvc2017_64</QtInstall>
-    <QtModules>quick</QtModules>
+    <QtModules>quick;widgets</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
   <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
@@ -109,6 +109,7 @@
     <ClCompile Include="ImageViewer.cpp" />
     <ClCompile Include="JsonTrackerObject.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MarkerBoxes.cpp" />
     <ClCompile Include="Trackers.cpp" />
     <ClCompile Include="WeightedEdgesExtractor.cpp" />
     <QtRcc Include="qml.qrc" />
@@ -125,6 +126,7 @@
   <ItemGroup>
     <ClInclude Include="json.hpp" />
     <ClInclude Include="JsonTrackerObject.h" />
+    <ClInclude Include="MarkerBoxes.h" />
     <ClInclude Include="Trackers.h" />
     <ClInclude Include="WeightedEdgesExtractor.h" />
   </ItemGroup>

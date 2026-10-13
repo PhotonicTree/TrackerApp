@@ -136,6 +136,22 @@ Window {
                     checked: true
                 }
 
+                // Order here MUST match BackendWorkerHelpers::TrackerType: getAllSelectedTrackers()
+                // sends this column's children by position and GetSelectedTrackers casts the
+                // index straight to the enum, so inserting out of order silently mis-assigns
+                // every tracker below the insertion point.
+                Switch {
+                    id: trackerVitSwitch
+                    text: "ViT"
+                    checked: true
+                }
+
+                Switch {
+                    id: trackerHybridSwitch
+                    text: "Hybrid (ViT+CSRT)"
+                    checked: false
+                }
+
                 Switch {
                     id: trackerHoughCirclesSwitch
                     text: "HoughCircles"
@@ -150,6 +166,22 @@ Window {
             ColumnLayout {
                 Layout.margins: 20
                 Layout.fillHeight: true
+
+                // Not part of trackerSelectionColumnLayout: that column maps to the tracker enum.
+                Switch {
+                    id: reuseBoxesSwitch
+                    text: "Reuse saved boxes without review"
+                    checked: false
+                    onCheckedChanged: backendWorker.SetReuseSavedBoxes(checked)
+                }
+
+                Button {
+                    Layout.alignment: Qt.AlignBottom | Qt.AlignRight
+                    text: "Label Boxes Only"
+                    enabled: path.text !== ""
+                    onClicked: backendWorker.LabelBoxesOnly(path.text)
+                }
+
                 Button {
                     Layout.alignment: Qt.AlignBottom | Qt.AlignRight
                     text: "Run Tracking For Selected Trackers"
@@ -239,6 +271,7 @@ Window {
     function getAllSelectedTrackers()
     {
         var anySelected = false;
+        switchesStatus = [];
         for (let i = 0; i < trackerSelectionColumnLayout.children.length; i++)
         {
             switchesStatus.push(trackerSelectionColumnLayout.children[i].checked);

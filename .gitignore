@@ -1,7 +1,5 @@
 # ---- Visual Studio / MSBuild ----
 .vs/
-# e.g. TrackerApp.vcxproj.user (machine-specific).
-# Note: .gitignore has no trailing comments, so this must sit on its own line.
 *.user
 *.suo
 *.sdf
@@ -71,8 +69,7 @@ ui_*.h
 Thumbs.db
 desktop.ini
 
-# ---- Project data / artifacts (large, not source) ----
-# Labels/ holds the box files; its folder names identify participants.
+# ---- Local data: recordings, results, box files, model files ----
 TrackerApp/Recordings/
 TrackerApp/Results/
 TrackerApp/Labels/
@@ -87,7 +84,6 @@ Labels/
 *.log
 *.csv
 *.png
-# The exported dataset is meant to be committed.
 !data/*.csv
 
 # ---- Stray backup copies ----
@@ -99,6 +95,5 @@ Labels/
 __pycache__/
 *.pyc
 
-# ---- Private / generated analysis files ----
-# subject_codes.json maps recording names to subject codes and must stay private.
+# ---- Local analysis files (e.g. subject_codes.json) ----
 TrackerApp/Scripts/*.json

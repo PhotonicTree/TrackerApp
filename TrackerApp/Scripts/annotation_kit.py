@@ -8,7 +8,8 @@ Writes into --out:
                   in the browser and exports the clicks as a JSON file. Give the same file to
                   every annotator.
   manifest.json   which video, frame and marker every patch comes from, and where the patch lies
-                  in the frame. Private (it names the recordings); analyse_annotations.py reads it.
+                  in the frame. It names the recordings and is not distributed;
+                  analyse_annotations.py reads it.
 
 Sample (all parameters are options):
   - every marker of every 4-marker video (14 sequences x 5 views) in two frames: one near the

@@ -14,9 +14,9 @@ Two properties of the evaluation are enforced here:
   Assigning each marker its own nearest detection independently would allow exactly that, and
   would hide identity swaps.
 
-Subjects are reported by code (S1, S2, ...). The mapping from recording names to codes is kept in
-a private, untracked file (subject_codes.json next to this module, or the path in the
-SUBJECT_CODES environment variable), so participant names never appear in any output.
+Subjects are reported by code (S1, S2, ...). The mapping from recording names to codes is read
+from subject_codes.json next to this module, or from the path in the SUBJECT_CODES environment
+variable; it is not part of the repository.
 """
 
 import csv
@@ -49,7 +49,7 @@ TRACKER_NAMES = {"TrackerBoosting": "Boosting", "TrackerCSRT": "CSRT", "TrackerD
 # --------------------------------------------------------------------------------------------
 
 def load_subject_codes(path=None):
-    """Private mapping from the subject token in a recording name to its code, e.g. {"...": "S1"}.
+    """Mapping from the subject token in a recording name to its code, e.g. {"...": "S1"}.
 
     Returns an empty mapping when the file is absent, which is the case for released data whose
     file names already carry the codes.
@@ -67,7 +67,7 @@ def subject_of(name, codes=None):
 
     Accepts released names that start with the code ("S3_emotions_40_front...") and raw recording
     names ("20230223_1247_<subject>_4MarkersEmotions01", "<subject>MarkersViseme01"), whose subject
-    token is translated through the private mapping. Returns "unknown" if neither form matches.
+    token is translated through the mapping. Returns "unknown" if neither form matches.
     """
     base = re.sub(r"^\d{8}_\d{4}_", "", os.path.basename(name))
     coded = re.match(r"(S\d+)(?:_|$)", base)

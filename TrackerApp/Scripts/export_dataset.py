@@ -17,9 +17,9 @@ analyse_annotations.py has been run), README.md and LICENSE. Every analysis scri
 from the dataset alone. Deviations, failure and identity-swap labels, retention and statistics
 are derived by the scripts and are therefore not stored.
 
-Subjects are written as codes only. Recording folders carry a subject token, mapped through the
-private subject_codes.json; the export stops if a token has no code, and it checks that no folder
-name, subject token or local path reaches an exported file.
+Subjects are written as codes only. Recording folders carry a subject token, mapped through
+subject_codes.json; the export stops if a token has no code, and it checks that no folder name,
+subject token or local path reaches an exported file.
 
 Standard library only.
 """

@@ -1,7 +1,7 @@
 # Scripts
 
 Everything needed to rerun the full benchmark and compute the comparisons from its results.
-Standard library Python 3 only; nothing to install.
+Python 3 and its standard library only, except where noted.
 
 | Script | Purpose |
 |---|---|
@@ -12,7 +12,7 @@ Standard library Python 3 only; nothing to install.
 | `compare_hybrid.py` | Retention, retention area, mis-assignment and deviation per tracker, averaged per subject; the hybrid against its components. |
 | `validate_reference.py` | Agreement between the Blob Detection and PCWE reference streams, all markers, every frame. |
 | `show_reference.py` | Visual check of the reference: the reference alone on white beside the same points on the recording (needs `opencv-python`). |
-| `annotation_kit.py` | Builds the manual-annotation kit: a stratified sample of marker-frames, cut as anonymous patches into one offline page (`annotate_template.html`), plus a private manifest (needs `opencv-python`). |
+| `annotation_kit.py` | Builds the manual-annotation kit: a stratified sample of marker-frames, cut as anonymous patches into one offline page (`annotate_template.html`), plus a manifest linking each patch to its recording (needs `opencv-python`). |
 | `analyse_annotations.py` | Manual centres against Blob Detection, PCWE and the trackers; inter-annotator agreement and repeatability. |
 | `analysis_common.py` | Shared parsing, tracker-independent reference construction, exact assignment, subject codes. |
 
@@ -46,15 +46,15 @@ Results are written to `TrackerApp/Results/benchmark/<condition>/<recording fold
 
 **Time and memory.** Every marker is tracked by its own tracker instance, so `run` starts one
 `TrackerBench` process per (video, tracker, marker), plus one per video for the reference streams,
-and runs up to `--processes` of them at a time (default 12 of 20 logical CPUs; on the i9-13900H
-under WSL the throughput is the same from 8 to 16 processes and half as high with all 20). A
+and runs up to `--processes` of them at a time (default: 60 % of the logical CPUs; throughput
+does not increase when every logical CPU is used). A
 tracker process decodes the video itself and needs 0.15–0.4 GB, GOTURN about 1 GB; the reference
 process holds the decoded video, about 4.4 GB for 700 frames. Processes start only while their
 measured peak memory fits in what was available at the start minus `--memory-reserve` (1.5 GB).
 Every process starts from the default random state and shares nothing with the others, so each
-result is what tracking that marker alone gives; this was checked for every tracker against
-runs in one process, with 1 and 20 threads. The 40-marker pilot video took about 50 minutes and
-the complete benchmark about half a day. No latency is measured, since the processes compete for
+result is what tracking that marker alone gives, for every tracker and any number of processes.
+On a 20-thread laptop CPU (Intel i9-13900H), one 40-marker video takes about 50 minutes and the
+complete benchmark about half a day. No latency is measured, since the processes compete for
 the CPU; `run --frame-by-frame` runs the trackers frame by frame, one process at a time, as the
 single-thread latency measurement (`TrackerBench --threads 1`) does. To keep a run going after the
 terminal is closed:
@@ -93,8 +93,9 @@ A tracker has lost its marker in a frame when it reports failure, when its centr
 marker's reference position than its own, or when it lies more than two marker diameters from its
 own marker (the boxes are about three diameters wide, so the marker is then outside the tracked
 region). Deviations are computed over the remaining (active) frames and reported with the share of
-such frames; retention counts a marker as lost from the first failure on. `--lost-beyond` changes
-the two-diameter threshold in all three scripts (0 switches that condition off).
+such frames; retention counts a marker as lost once a failure has lasted ten consecutive frames
+(`--loss-frames` in `compare_hybrid.py`). `--lost-beyond` changes the two-diameter threshold in all
+three scripts (0 switches that condition off).
 
 ## Checking the reference visually
 
@@ -108,7 +109,7 @@ Left: the reference alone on white (coloured dot = marker n, grey = detection no
 marker, red `n?` = no reference for marker n in that frame). Right: the same on the recording. The
 reference is built by the same code as in the analysis. The recording path is read from the results
 file; pass `--video` when it has moved or when reading the exported dataset, which stores no paths.
-The output shows faces, so keep it out of the repository (`Results/` is ignored).
+The output contains images of the recordings.
 
 ## Validating the reference by manual annotation
 
@@ -125,8 +126,9 @@ in two frames (near the start, and at the largest displacement), adds marker-fra
 Detection and PCWE disagree, and repeats 10 % of them. Each marker-frame is shown as a small patch
 cut around it with a random offset, without any detector output; the annotator clicks the marker
 centre or marks it as not visible. The page works offline, keeps progress in the browser and
-exports the clicks. `manifest.json` names the recordings and stays private; the analysis writes
-`annotation_points.csv` with coded video ids and annotators, which can be released.
+exports the clicks. `manifest.json` links each patch to its recording and frame and is not
+distributed; the analysis writes `annotation_points.csv`, with coded video ids and anonymous
+annotator columns, which is part of the released dataset.
 
 ## Exporting the dataset
 
@@ -143,15 +145,15 @@ writes the publishable dataset to `data/` at the repository root. Each video bec
 on the dataset as on the raw results. Deviations, failure labels, retention and statistics are
 derived by the scripts and are not stored. The export stops if a subject has no code, and it
 fails if a subject token, folder name or local path would reach a data file. The complete
-benchmark exports to about 50 MB.
+benchmark exports to about 65 MB.
 
 ## Subject codes
 
-Outputs identify subjects by code (S1, S2, …), never by name. The recording folder names contain
-a subject token, which is translated through a private mapping file, `subject_codes.json` in this
-directory (or the path in the `SUBJECT_CODES` environment variable), for example
-`{"<token>": "S1"}`. The file is listed in `.gitignore` and must not be committed. Files whose names
-already start with a code (`S3_…`) need no mapping.
+Outputs identify subjects by code (S1, S2, …). The recording folder names contain a subject
+token, which is translated through a mapping file, `subject_codes.json` in this directory (or the
+path given by the `SUBJECT_CODES` environment variable), for example `{"<token>": "S1"}`; the
+mapping is not part of the repository. Files whose names already start with a code (`S3_…`) need
+no mapping.
 
 ## Design decisions
 
@@ -175,7 +177,7 @@ conditional deviation computed over few frames, and a large penalised one.
 
 **Identity swaps are detected automatically.** Each tracker target is scored against its own
 fixed reference marker; a frame where the target sits closer to a different marker counts as
-mis-assigned, and in `compare_hybrid.py` ends that marker's retention.
+mis-assigned and as a failure of that marker.
 
 **Markers the reference never sees are not scored.** Retention and its area are computed over
 the frames in which the reference detects the marker; a marker it never detects is left out

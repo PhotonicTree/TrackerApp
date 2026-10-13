@@ -77,9 +77,8 @@ python3 validate_reference.py --results data/glued/*.json   # Blob Detection ver
 
 The trackers ran with OpenCV 4.10.0 and its `opencv_contrib` modules, at their default
 parameters; the neural trackers used the model files listed, with their hashes, in the TrackerApp
-README. Per-frame timings are not included: these runs used several threads and split some
-trackers into groups of markers, so their timings are not latencies. Latency was measured
-separately, on a single thread.
+README. Per-frame timings are not included: the markers were tracked in parallel processes, so
+their timings are not latencies. Latency was measured separately, on a single thread.
 
 ## Licence
 

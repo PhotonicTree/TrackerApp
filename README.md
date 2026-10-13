@@ -194,7 +194,7 @@ markers of that video and detection is restricted to the face region:
 
 - area window from 0.4 × the area of the 10th-percentile labelled diameter to 2.5 × the area of the
   90th-percentile diameter, so it follows the apparent marker size of each camera (markers are about
-  6 px across from the bottom camera and 13–15 px from the front);
+  8 px across from the bottom camera and 13–15 px from the front);
 - circularity ≥ 0.5, convexity ≥ 0.75, inertia ratio ≥ 0.1; thresholds 20–150 in steps of 1;
 - search region: the bounding rectangle of the labelled boxes plus 200 px on every side.
 
@@ -223,11 +223,12 @@ and a reference entry is `(x;y),(x;y),…`, with three decimal places; parsers m
 
 ## Hybrid pipeline
 
-`HybridTracker` implements a cooperative scheme: ViT as the primary state-estimator with CSRT as
-the fallback state-corrector. Both advance every frame; an anomaly in the primary — a failed
-update, a box whose area has drifted outside `[0.5, 2.0]` of its initial size, or a centre jump
-beyond 40 px — hands that frame to the fallback and re-initialises ViT from the fallback's box.
-Every switch is recorded under `_diagnostics.HybridVitCsrt.fallback_switches`.
+`HybridTracker` runs ViT as the primary tracker and CSRT as the fallback; both advance every
+frame. While their centres lie within a third of the shorter side of the initial box (about one
+marker diameter), ViT's position is used; when they disagree by more, or ViT reports failure, CSRT's
+position is used for that frame. ViT is re-initialised from CSRT's box when it reports failure or
+after ten consecutive frames of disagreement. Every frame in which CSRT's position is used is
+recorded under `_diagnostics.HybridVitCsrt.fallback_switches`.
 
 ## License
 

@@ -25,6 +25,10 @@ Metrics produced, and what each answers:
 
 Usage:
   python3 analyse_tracking.py --results Results/run.json --out-csv per_frame.csv
+
+After the per-file summaries it prints one table pooled over every frame of all the files given, per
+tracker: mean +- SD of |dx|, |dy| and the distance over active frames, their maxima, and the share
+of scored frames in which the tracker was active (Table 4 of the article for the 4-marker files).
 """
 
 import argparse
@@ -265,6 +269,38 @@ def main():
               f"{row['mean_error_px']:>9.3f}"
               f"{row['penalised_error_px']:>8.2f}{row['bias_dx']:>9.3f}{row['bias_dy']:>9.3f}"
               f"{row['mis_assignment_rate']:>9.3f}{row['retention_area']:>9.3f}")
+
+
+    pooled_table(all_rows)
+
+
+def pooled_table(rows):
+    """Per tracker, pooled over every active frame of all files: absolute component deviations,
+    distance (mean +- population SD, maximum) and the share of scored frames that were active."""
+    pooled = {}
+    for row in rows:
+        if row["state"] == "unscored":
+            continue
+        entry = pooled.setdefault(row["tracker"], {"dx": [], "dy": [], "d": [], "traj": set(), "scored": 0})
+        entry["scored"] += 1
+        if row["state"] != "active":
+            continue
+        entry["dx"].append(abs(float(row["dx"])))
+        entry["dy"].append(abs(float(row["dy"])))
+        entry["d"].append(float(row["error_px"]))
+        entry["traj"].add((row["sequence"], row["marker_id"]))
+
+    def ms(values):
+        return f"{statistics.mean(values):5.2f}+-{statistics.pstdev(values):4.2f}"
+
+    print("\nPooled over all frames of all files (active frames only):")
+    header = (f"{'tracker':<18}{'traj':>5}{'frames':>8}  {'|dx|':>10}{'max':>7}  {'|dy|':>10}{'max':>7}  "
+              f"{'distance':>10}{'max':>7}{'active %':>10}")
+    print(header)
+    print("-" * len(header))
+    for name, e in sorted(((n, e) for n, e in pooled.items() if e["d"]), key=lambda item: statistics.mean(item[1]["d"])):
+        print(f"{name:<18}{len(e['traj']):>5}{len(e['d']):>8}  {ms(e['dx'])}{max(e['dx']):7.2f}  "
+              f"{ms(e['dy'])}{max(e['dy']):7.2f}  {ms(e['d'])}{max(e['d']):7.2f}{100 * len(e['d']) / e['scored']:10.1f}")
 
 
 if __name__ == "__main__":

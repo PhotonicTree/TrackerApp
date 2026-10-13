@@ -11,6 +11,37 @@ one tracking core:
 `Scripts/` runs the complete benchmark over every recording and computes the comparisons from the
 results; see [Scripts/README.md](TrackerApp/Scripts/README.md).
 
+## Repository layout
+
+```
+TrackerApp.sln                     Visual Studio solution (Windows build of the GUI)
+TrackerApp/
+  CMakeLists.txt                   CMake build of both programs (Linux)
+
+  Tracking core, shared by both programs and free of Qt:
+  Trackers.h/.cpp                  the eleven OpenCV trackers, the ViT wrapper, the ViT+CSRT hybrid,
+                                   per-marker tracking and video decoding
+  MarkerBoxes.h/.cpp               marker box files, the labelling window, Blob Detection settings
+                                   and the reference search region
+  WeightedEdgesExtractor.h/.cpp    Point Center Weighted Extractor (PCWE)
+  JsonTrackerObject.h/.cpp         results file writer (json.hpp: nlohmann/json 3.11.2)
+
+  TrackerBench, the headless harness:
+  cli_main.cpp                     command line, per-marker job scheduling, reference streams
+  ThreadLocalRand.cpp              per-thread rand(), so parallel runs are reproducible
+
+  TrackerApp, the Qt desktop application:
+  main.cpp, main.qml, qml.qrc      entry point and user interface
+  BackendController.h/.cpp         connection between the QML interface and the worker thread
+  BackendWorker.h/.cpp             runs the trackers off the interface thread
+  FrameImageProvider.h/.cpp        supplies video frames to the interface
+  ImageViewer.h/.cpp               OpenGL display of OpenCV images
+  TrackerApp.vcxproj*              Visual Studio project
+
+  Scripts/                         benchmark runner, analysis, manual annotation study and dataset
+                                   export (see Scripts/README.md)
+```
+
 ## Build
 
 OpenCV **4.9.0 or newer with the `opencv_contrib` modules is required** — `cv::TrackerVit` does not
@@ -65,36 +96,39 @@ reshaped it (`"adjusted": true`), for example around a marker that is not round.
 rebuilds the squares at another multiple of the diameter and scales reshaped boxes about their
 centre in the same proportion.
 
-### The labelling window
+Boxes are labelled in an OpenCV window opened by both programs, pre-filled with the markers Blob
+Detection finds on frame 0; press `h` in the window for its keys.
 
-Both programs label in the same OpenCV window: the whole frame on the left and a magnifier on
-the right. The magnifier follows the cursor over the frame and stays put when the cursor moves
-into it, so markers can be clicked precisely there; the window can be resized or maximised. It
-opens with the saved boxes if the video already has a box file, and otherwise with the markers Blob Detection finds on frame 0: with the reference
-settings on sparse layouts, and with looser settings on dense ones, where they box 30–38 of the 40
-markers instead of 16–24; proposals much larger than a marker (nostrils) or not surrounded by skin
-(buttons, hair) are left out, and the few remaining false ones are removed by hand. The looser settings only
-pre-fill the window; the reference is always computed with the settings of Appendix A.
+## Reproducing the published results
 
-| Input | Action |
-|---|---|
-| left click (either panel) | add a box on the marker under the cursor (snaps to its centre); on an existing box, re-centre it |
-| drag an edge or corner (magnifier) | reshape the box into a rectangle; the edge under the cursor lights up, reshaped boxes turn azure |
-| right click (either panel) | remove the box under the cursor |
-| mouse wheel, `1` `2` `4` `8` | magnifier zoom |
-| `a` / `A` | add the Blob Detection proposals not yet boxed, with the reference / looser settings |
-| `+` / `-` | box size, in steps of 0.25 × the marker diameter (reshaped boxes scale in proportion) |
-| `u` / `c` | undo / clear all |
-| `Enter` or `s` | save (asks again if the count differs from the expected number) |
-| `Esc` | skip this video without saving |
-| `Q` | stop labelling altogether (batch labelling) |
-| `h` | show these keys |
+The data of the article are attached to the
+[v1.0-sensors release](https://github.com/PhotonicTree/TrackerApp/releases/tag/v1.0-sensors) as
+`TrackerApp-data.zip`: the initial boxes, every reference detection and every tracker position in
+every frame, and the manual annotations (layout described in its README). The analysis scripts
+recompute the results from these files alone, with Python 3 and its standard library; neither the
+videos nor OpenCV are needed. Table and section numbers refer to the article.
 
-Leave the window with Enter, Esc or Q: OpenCV's GTK backend (Linux, WSL) cannot report a window
-closed with its title-bar button, so there the window simply reappears.
+```bash
+unzip TrackerApp-data.zip                      # creates TrackerApp-data/
+cd TrackerApp/Scripts
+D=../../TrackerApp-data                        # where the archive was unpacked
 
-Label every visible marker and remove proposals that are not markers (for example a nostril). In
-the oblique views some of the four markers are hidden; label only the visible ones.
+python3 analyse_tracking.py --results $D/sparse/*.json            # Table 4: pooled table at the end
+python3 aggregate_subjects.py --glob "$D/sparse/*_front.json" --out-prefix front
+python3 subject_statistics.py front_trajectories.csv              # Section 5.2: intervals and paired tests
+python3 analyse_tracking.py --results $D/sweep/s1.5/*.json        # Table 5, once per scale s1.5 ... s3.0
+python3 compare_hybrid.py "$D/dense/*.json"                       # final retention, mis-assignment (Table 7)
+python3 analyse_tracking.py --results $D/dense/*.json             # Table 7: deviations, pooled table
+python3 validate_reference.py --results $D/glued/*.json           # Section 5.1; also sparse/ and dense/
+python3 analyse_annotations.py --points $D/annotation_points.csv --data $D   # Section 5.1: manual annotation
+```
+
+Deviations are in pixels; the article converts them at 0.24 mm/pixel. `analyse_tracking.py` also
+writes the per-frame states and deviations (`per_frame_errors.csv`, several hundred MB for the
+40-marker files). Two quantities need material that is not released: the annotators' repeatability
+(it needs the image patches) and the execution latency of Table 6 (measured separately on one
+thread). Re-running the trackers themselves needs the recordings, which are not public, OpenCV
+4.10.0 with `opencv_contrib` and the model files above.
 
 ## Two ways to run
 

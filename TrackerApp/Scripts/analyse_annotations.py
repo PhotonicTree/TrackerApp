@@ -2,6 +2,7 @@
 
   python analyse_annotations.py --kit ../Results/annotation --results ../Results/benchmark \\
                                 annotations_AB_kit-....json annotations_CD_kit-....json
+  python analyse_annotations.py --points data/annotation_points.csv --data data   # from the release
 
 The manual centre of a marker in a frame is the mean of the annotators' clicks on its patch. It
 shares nothing with the detectors, so it validates the reference independently. Reported:
@@ -25,6 +26,8 @@ Standard library only.
 
 import argparse
 import csv
+import glob
+import gzip
 import json
 import math
 import os
@@ -68,12 +71,92 @@ def line(label, s):
             f" y [{s['loa_y'][0]:+.2f}, {s['loa_y'][1]:+.2f}]")
 
 
+def summarise_points(path, data_dir=None):
+    """Agreement statistics from annotation_points.csv alone, as released with the dataset. The
+    manual centre is the mean of the two annotators where both marked the marker; the 'start' and
+    'peak' rows are the representative sample, the 'disagreement' rows a selection of hard cases."""
+    with open(path, newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    value = lambda r, k: float(r[k]) if r[k] != "" else None
+    for title, keep in (("start and peak frames (representative)", ("start", "peak")),
+                        ("disagreement frames (selected hard cases)", ("disagreement",))):
+        print(f"\n{title}:")
+        for layout in (None, "4", "40"):
+            sel = [r for r in rows if r["stratum"] in keep and (layout is None or r["layout"] == layout)]
+            inter, streams, missed = [], {"blob": [], "pcwe": []}, {"blob": 0, "pcwe": 0}
+            for r in sel:
+                a1, a2 = (value(r, "annotator_1_x"), value(r, "annotator_1_y")), (value(r, "annotator_2_x"), value(r, "annotator_2_y"))
+                if None in a1 or None in a2:
+                    continue
+                inter.append((a1[0] - a2[0], a1[1] - a2[1]))
+                centre = ((a1[0] + a2[0]) / 2, (a1[1] + a2[1]) / 2)
+                for stream in streams:
+                    s = (value(r, f"{stream}_x"), value(r, f"{stream}_y"))
+                    if None in s:
+                        missed[stream] += 1
+                    else:
+                        streams[stream].append((s[0] - centre[0], s[1] - centre[1]))
+            tag = "all layouts" if layout is None else f"layout={layout}"
+            print(line(f"annotators, {tag}", summary(inter)))
+            for stream, name in (("blob", "Blob Detection"), ("pcwe", "PCWE")):
+                seen = len(streams[stream]) + missed[stream]
+                print(line(f"{name}, {tag}", summary(streams[stream]))
+                      + f"  missed {missed[stream]} ({100 * missed[stream] / max(1, seen):.1f}%)")
+    if data_dir:
+        compare_trackers(rows, data_dir)
+    return 0
+
+
+def compare_trackers(rows, data_dir):
+    """Every tracker's mean distance from the manual centres and from the Blob reference on the same
+    annotated marker-frames (all rows; frames where the tracker reports the marker as tracked)."""
+    value = lambda r, k: float(r[k]) if r[k] != "" else None
+    wanted = {}
+    for r in rows:
+        a1, a2 = (value(r, "annotator_1_x"), value(r, "annotator_1_y")), (value(r, "annotator_2_x"), value(r, "annotator_2_y"))
+        blob = (value(r, "blob_x"), value(r, "blob_y"))
+        if None in a1 or None in a2 or None in blob:
+            continue
+        manual = ((a1[0] + a2[0]) / 2, (a1[1] + a2[1]) / 2)
+        wanted.setdefault(r["video_id"], {})[(int(r["frame"]), int(r["marker"]))] = (manual, blob)
+    distances = {}
+    for video_id, points in wanted.items():
+        found = glob.glob(os.path.join(data_dir, "**", f"{video_id}_trackers.csv.gz"), recursive=True)
+        found = [f for f in found if os.sep + "sweep" + os.sep not in f]
+        if len(found) != 1:
+            raise SystemExit(f"{video_id}: expected one tracker file under {data_dir}, found {len(found)}")
+        with gzip.open(found[0], "rt", encoding="utf-8", newline="") as handle:
+            for row in csv.DictReader(handle):
+                key = (int(row["frame"]), int(row["marker"]))
+                if key in points and row["valid"] == "1":
+                    manual, blob = points[key]
+                    position = (float(row["cx"]), float(row["cy"]))
+                    name = TRACKER_NAMES.get(row["tracker"], row["tracker"])
+                    distances.setdefault(name, []).append((math.dist(position, manual), math.dist(position, blob)))
+    order = sorted(distances)
+    tau = kendall_tau([statistics.mean(d[0] for d in distances[t]) for t in order],
+                      [statistics.mean(d[1] for d in distances[t]) for t in order])
+    print("\nTrackers: mean distance from the manual centre and from the Blob reference (px), same marker-frames:")
+    for name in sorted(distances, key=lambda t: statistics.mean(d[0] for d in distances[t])):
+        d = distances[name]
+        print(f"  {name:<20} n={len(d):<4} manual {statistics.mean(x[0] for x in d):7.2f}   Blob {statistics.mean(x[1] for x in d):7.2f}")
+    print(f"  Kendall tau between the two orderings: {tau:.3f}")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--kit", required=True, help="directory with manifest.json")
-    parser.add_argument("--results", required=True, help="run_benchmark.py output directory")
-    parser.add_argument("annotations", nargs="+", help="files exported from the annotation page")
+    parser.add_argument("--kit", help="directory with manifest.json")
+    parser.add_argument("--results", help="run_benchmark.py output directory")
+    parser.add_argument("annotations", nargs="*", help="files exported from the annotation page")
+    parser.add_argument("--points", help="summarise a released annotation_points.csv instead (no kit or "
+                                         "results needed); repeatability needs the kit")
+    parser.add_argument("--data", help="with --points: the released dataset directory, to compare the "
+                                       "trackers with the manual centres and the reference")
     args = parser.parse_args()
+    if args.points:
+        return summarise_points(args.points, args.data)
+    if not (args.kit and args.results and args.annotations):
+        parser.error("--kit, --results and the exported annotation files are required (or --points)")
 
     with open(os.path.join(args.kit, "manifest.json"), encoding="utf-8") as handle:
         manifest = json.load(handle)

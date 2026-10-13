@@ -116,6 +116,8 @@ The output shows faces, so keep it out of the repository (`Results/` is ignored)
 python annotation_kit.py --results ../Results/benchmark --recordings <rec> --out ../Results/annotation
 # every annotator opens ../Results/annotation/annotate.html, annotates, presses Export
 python3 analyse_annotations.py --kit ../Results/annotation --results ../Results/benchmark annotations_*.json
+# from the released dataset alone (no kit, no results): agreement and the tracker comparison
+python3 analyse_annotations.py --points data/annotation_points.csv --data data
 ```
 
 The kit samples every marker of the 4-marker videos and 10 random markers of each 40-marker video

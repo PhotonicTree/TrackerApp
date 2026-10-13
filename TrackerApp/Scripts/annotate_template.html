@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marker Centre Annotation</title>
+<!-- Template for annotation_kit.py, which embeds the patches; it does nothing on its own.
+     Everything runs in the browser, offline: no file is uploaded anywhere. -->
+<style>
+  :root {
+    --bg: #f4f4f2; --panel: #ffffff; --text: #1d1d1b; --muted: #6b6b66; --line: #d9d9d4;
+    --accent: #1f6feb; --mark: #ff2bd6; --ok: #1a7f37; --warn: #9a6700; --stage: #808080;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 980px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 20px; margin: 4px 0 12px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+  .hidden { display: none !important; }
+  button { font: inherit; padding: 7px 12px; border: 1px solid var(--line); border-radius: 6px;
+           background: #fff; color: var(--text); cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button:disabled { opacity: .45; cursor: default; }
+  input[type=text] { font: inherit; padding: 7px 10px; border: 1px solid var(--line); border-radius: 6px; width: 220px; }
+  kbd { font: 12px ui-monospace, monospace; border: 1px solid var(--line); border-bottom-width: 2px;
+        border-radius: 4px; padding: 0 5px; background: #fafaf8; }
+  button.primary kbd { background: transparent; color: #fff; border-color: rgba(255,255,255,.6); }
+  ul { padding-left: 20px; margin: 8px 0; }
+  .work { display: grid; grid-template-columns: minmax(0, 520px) minmax(0, 1fr); gap: 16px; align-items: start; }
+  @media (max-width: 760px) { .work { grid-template-columns: 1fr; } }
+  .stage { background: var(--stage); border-radius: 8px; padding: 10px; }
+  canvas { display: block; width: 100%; height: auto; aspect-ratio: 1; cursor: crosshair; touch-action: none; }
+  .bar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin: 8px 0 4px; }
+  .bar > div { height: 100%; background: var(--accent); width: 0; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+  .muted { color: var(--muted); }
+  .state { font-weight: 600; }
+  .state.ok { color: var(--ok); } .state.warn { color: var(--warn); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Marker centre annotation</h1>
+
+  <section id="start" class="panel">
+    <p>Each picture is a small, enlarged piece of skin with a drawn marker on it. <b>Click the centre of the
+      marker</b> as exactly as you can. Take the centre of the whole dark dot, not of its darkest pixel.</p>
+    <ul>
+      <li>The marker is not in the middle of the picture on purpose. The dashed circle shows where to look:
+        if more than one marker is visible, mark the one inside or nearest to the circle.</li>
+      <li>You can click again to correct, or move the mark with the arrow keys
+        (<kbd>Shift</kbd> for larger steps). <kbd>Enter</kbd> or <kbd>Space</kbd> confirms and moves on.</li>
+      <li>If there is no marker, or you cannot tell where its centre is (blurred, hidden by a fold, cut by
+        the edge), press <kbd>N</kbd>: <i>not visible</i>.</li>
+      <li><kbd>B</kbd> goes back, <kbd>C</kbd> switches contrast enhancement on and off.</li>
+      <li>Work at your own pace; progress is saved in this browser after every picture, so you can close the
+        page and continue later with the same name. Some pictures appear twice; that is intended.</li>
+      <li>When you are done, press <b>Export</b> and send the downloaded file back.</li>
+    </ul>
+    <div class="row">
+      <label for="name">Your initials:</label>
+      <input id="name" type="text" maxlength="12" autocomplete="off">
+      <button id="begin" class="primary">Start</button>
+      <span id="resumeNote" class="muted"></span>
+    </div>
+  </section>
+
+  <section id="work" class="hidden">
+    <div class="work">
+      <div class="stage"><canvas id="canvas" width="500" height="500" aria-label="marker patch"></canvas></div>
+      <div class="panel">
+        <div><span id="counter">0 / 0</span> <span class="muted" id="eta"></span></div>
+        <div class="bar"><div id="progress"></div></div>
+        <p id="state" class="state">Click the marker centre.</p>
+        <div class="row">
+          <button id="next" class="primary" disabled>Next <kbd>Enter</kbd></button>
+          <button id="none">Not visible <kbd>N</kbd></button>
+        </div>
+        <div class="row">
+          <button id="back">Back <kbd>B</kbd></button>
+          <button id="contrast">Contrast <kbd>C</kbd></button>
+          <button id="export">Export</button>
+        </div>
+        <p class="muted" id="who"></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="done" class="panel hidden">
+    <p><b>All pictures are done. Thank you!</b></p>
+    <p>Press <b>Export</b> and send the downloaded file back. Your answers also stay saved in this browser.</p>
+    <div class="row"><button id="export2" class="primary">Export</button><button id="review">Review answers</button></div>
+  </section>
+</main>
+
+<script>
+"use strict";
+const KIT = /*KIT_DATA*/null;
+
+const $ = (id) => document.getElementById(id);
+const canvas = $("canvas"), ctx = canvas.getContext("2d");
+let annotator = "", order = [], answers = {}, position = 0, enhance = false;
+let current = null, mark = null, shownAt = 0;
+const images = {};
+
+if (!KIT) {
+  document.querySelector("main").innerHTML = "<p>This is the template; build the kit with annotation_kit.py.</p>";
+  throw new Error("no kit data");
+}
+const items = Object.fromEntries(KIT.items.map((item) => [item.id, item]));
+
+function storageKey() { return `annotation:${KIT.kit}:${annotator}`; }
+function save() {
+  try { localStorage.setItem(storageKey(), JSON.stringify({ order, answers, position })); } catch (e) { /* unavailable */ }
+}
+function load() {
+  try { return JSON.parse(localStorage.getItem(storageKey()) || "null"); } catch (e) { return null; }
+}
+
+// Same order on every visit of one annotator, a different order for each annotator.
+function shuffled(ids, seedText) {
+  let h = 2166136261;
+  for (const ch of seedText) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); }
+  const random = () => { h = (h + 0x6D2B79F5) | 0; let t = Math.imul(h ^ (h >>> 15), 1 | h);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const out = ids.slice();
+  for (let i = out.length - 1; i > 0; i--) { const j = Math.floor(random() * (i + 1)); [out[i], out[j]] = [out[j], out[i]]; }
+  return out;
+}
+
+function image(id) {
+  if (!images[id]) {
+    const img = new Image();
+    img.src = "data:image/png;base64," + items[id].png;
+    images[id] = img;
+  }
+  return images[id];
+}
+
+function enhanced(img, size) {
+  const off = document.createElement("canvas");
+  off.width = size; off.height = size;
+  const o = off.getContext("2d");
+  o.drawImage(img, 0, 0);
+  if (!enhance) return off;
+  const data = o.getImageData(0, 0, size, size), px = data.data, lum = [];
+  for (let i = 0; i < px.length; i += 4) lum.push(0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2]);
+  const sorted = lum.slice().sort((a, b) => a - b);
+  const lo = sorted[Math.floor(0.02 * sorted.length)], hi = sorted[Math.floor(0.98 * sorted.length)];
+  const scale = 255 / Math.max(1, hi - lo);
+  for (let i = 0; i < px.length; i += 4)
+    for (let c = 0; c < 3; c++) px[i + c] = Math.max(0, Math.min(255, (px[i + c] - lo) * scale));
+  o.putImageData(data, 0, 0);
+  return off;
+}
+
+function draw() {
+  if (!current) return;
+  const item = items[current], size = item.size, W = canvas.width;
+  const img = image(current);
+  if (!img.complete) { img.onload = draw; return; }
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(enhanced(img, size), 0, 0, W, W);
+  const zoom = W / size;
+  ctx.setLineDash([6, 6]); ctx.lineWidth = 1.5; ctx.strokeStyle = "rgba(255,255,255,0.55)";
+  ctx.beginPath(); ctx.arc(W / 2, W / 2, 0.3 * W, 0, 2 * Math.PI); ctx.stroke(); ctx.setLineDash([]);
+  if (mark && mark.status === "clicked") {
+    const x = (mark.x + 0.5) * zoom, y = (mark.y + 0.5) * zoom;   // patch pixel centres are integers
+    ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue("--mark");
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(x - 14, y); ctx.lineTo(x - 4, y); ctx.moveTo(x + 4, y); ctx.lineTo(x + 14, y);
+    ctx.moveTo(x, y - 14); ctx.lineTo(x, y - 4); ctx.moveTo(x, y + 4); ctx.lineTo(x, y + 14); ctx.stroke();
+  }
+}
+
+function show() {
+  if (position >= order.length) { finish(); return; }
+  $("work").classList.remove("hidden"); $("done").classList.add("hidden");
+  current = order[position];
+  const saved = answers[current];
+  mark = saved ? { ...saved } : null;
+  shownAt = performance.now();
+  const done = Object.keys(answers).length;
+  $("counter").textContent = `${position + 1} / ${order.length}`;
+  $("progress").style.width = `${100 * done / order.length}%`;
+  const times = Object.values(answers).map((a) => a.ms).filter((t) => t > 0 && t < 60000);
+  if (times.length > 10) {
+    const mean = times.reduce((a, b) => a + b, 0) / times.length;
+    $("eta").textContent = `· about ${Math.round(mean * (order.length - done) / 60000)} min left`;
+  }
+  updateState();
+  draw();
+}
+
+function updateState() {
+  const state = $("state");
+  if (!mark) { state.textContent = "Click the marker centre."; state.className = "state"; }
+  else if (mark.status === "clicked") { state.textContent = "Marked. Correct it or press Enter."; state.className = "state ok"; }
+  else { state.textContent = "Marked as not visible."; state.className = "state warn"; }
+  $("next").disabled = !mark;
+}
+
+function commit(status) {
+  if (!current) return;
+  if (status === "not_visible") mark = { status };
+  if (!mark) return;
+  const previous = answers[current];
+  answers[current] = { ...mark, ms: Math.round(performance.now() - shownAt) + (previous ? previous.ms : 0) };
+  position += 1;
+  save(); show();
+}
+
+function finish() {
+  current = null;
+  $("work").classList.add("hidden"); $("done").classList.remove("hidden");
+  save();
+}
+
+function exportAnswers() {
+  const out = { kit: KIT.kit, annotator, exported: new Date().toISOString(),
+    convention: "x, y in patch pixels; the centre of the top-left pixel is (0, 0)",
+    answers: order.filter((id) => answers[id]).map((id) => ({ id, ...answers[id] })) };
+  const blob = new Blob([JSON.stringify(out, null, 1)], { type: "application/json" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `annotations_${annotator}_${KIT.kit}.json`;
+  document.body.appendChild(link); link.click(); link.remove();
+}
+
+canvas.addEventListener("pointerdown", (event) => {
+  if (!current) return;
+  const rect = canvas.getBoundingClientRect(), size = items[current].size;
+  mark = { status: "clicked",
+           x: (event.clientX - rect.left) / rect.width * size - 0.5,
+           y: (event.clientY - rect.top) / rect.height * size - 0.5 };
+  updateState(); draw();
+});
+
+document.addEventListener("keydown", (event) => {
+  if ($("work").classList.contains("hidden") || event.target.tagName === "INPUT") return;
+  const step = event.shiftKey ? 0.5 : 0.1;
+  const moves = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] };
+  if (moves[event.key] && mark && mark.status === "clicked") {
+    mark.x += moves[event.key][0]; mark.y += moves[event.key][1]; updateState(); draw(); event.preventDefault();
+  } else if (event.key === "Enter" || event.key === " ") { commit(); event.preventDefault(); }
+  else if (event.key === "n" || event.key === "N") commit("not_visible");
+  else if (event.key === "b" || event.key === "B" || event.key === "Backspace") { back(); event.preventDefault(); }
+  else if (event.key === "c" || event.key === "C") { enhance = !enhance; draw(); }
+});
+
+function back() { if (position > 0) { position -= 1; save(); show(); } }
+
+$("name").addEventListener("input", () => {
+  annotator = $("name").value.trim().replace(/[^A-Za-z0-9_-]/g, "");
+  const saved = annotator && load();
+  $("resumeNote").textContent = saved ? `Saved progress found: ${Object.keys(saved.answers).length} answered.` : "";
+  $("begin").textContent = saved ? "Continue" : "Start";
+});
+$("begin").addEventListener("click", () => {
+  annotator = $("name").value.trim().replace(/[^A-Za-z0-9_-]/g, "");
+  if (!annotator) { $("name").focus(); return; }
+  const saved = load();
+  if (saved) { ({ order, answers, position } = saved); }
+  else { order = shuffled(KIT.items.map((item) => item.id), KIT.kit + ":" + annotator); answers = {}; position = 0; }
+  const firstOpen = order.findIndex((id) => !answers[id]);
+  position = firstOpen < 0 ? order.length : Math.min(position, firstOpen);
+  $("start").classList.add("hidden");
+  $("who").textContent = `Annotator ${annotator} · kit ${KIT.kit}`;
+  show();
+});
+$("next").addEventListener("click", () => commit());
+$("none").addEventListener("click", () => commit("not_visible"));
+$("back").addEventListener("click", back);
+$("contrast").addEventListener("click", () => { enhance = !enhance; draw(); });
+$("export").addEventListener("click", exportAnswers);
+$("export2").addEventListener("click", exportAnswers);
+$("review").addEventListener("click", () => { position = 0; show(); });
+</script>
+</body>
+</html>

@@ -83,7 +83,8 @@ def summarise_points(path, data_dir=None):
         print(f"\n{title}:")
         for layout in (None, "4", "40"):
             sel = [r for r in rows if r["stratum"] in keep and (layout is None or r["layout"] == layout)]
-            inter, streams, missed = [], {"blob": [], "pcwe": []}, {"blob": 0, "pcwe": 0}
+            present = [s for s in ("blob", "pcwe") if rows and f"{s}_x" in rows[0]]
+            inter, streams, missed = [], {s: [] for s in present}, {s: 0 for s in present}
             for r in sel:
                 a1, a2 = (value(r, "annotator_1_x"), value(r, "annotator_1_y")), (value(r, "annotator_2_x"), value(r, "annotator_2_y"))
                 if None in a1 or None in a2:
@@ -99,6 +100,8 @@ def summarise_points(path, data_dir=None):
             tag = "all layouts" if layout is None else f"layout={layout}"
             print(line(f"annotators, {tag}", summary(inter)))
             for stream, name in (("blob", "Blob Detection"), ("pcwe", "PCWE")):
+                if stream not in streams:
+                    continue
                 seen = len(streams[stream]) + missed[stream]
                 print(line(f"{name}, {tag}", summary(streams[stream]))
                       + f"  missed {missed[stream]} ({100 * missed[stream] / max(1, seen):.1f}%)")

@@ -18,11 +18,12 @@ repository (`Scripts/`).
 | `videos.csv` | One row per exported video: id, condition, box scale, subject, sequence, layout, view, frame count, number of markers, number of trackers, file. |
 | `sparse/` | 4 markers per face, five views (front, left, right, top, bottom). |
 | `dense/` | 40 markers per face, frontal view. |
-| `glued/` | 3 mm glued semi-spherical markers, five views; reference streams only. |
+| `glued/` | 3 mm glued semi-spherical markers, five views; reference streams only, no tracker outputs. |
 | `sweep/s<scale>/` | 4 markers, frontal view, with the initial boxes rebuilt at 1.5, 2.0, 2.5 and 3.0 × the marker diameter. |
-| `annotation_points.csv` | Manual marker centres from two annotators, with the Blob Detection and PCWE positions of the same marker-frames (see below). |
+| `annotation_points.csv` | Manual marker centres from two annotators, with the Blob Detection reference position of the same marker-frames (see below). |
 
-Each video is three files, named by its id `<subject>_<sequence>_<layout>_<view>`:
+Each video is three files, named by its id `<subject>_<sequence>_<layout>_<view>` (two for the glued
+videos, which have no tracker outputs):
 
 - **`<id>.json`** — metadata (subject, sequence, layout, view, condition, frame count, OpenCV
   version, the reference detector settings and search region, list of trackers) and `rois`, the initial box of every
@@ -42,7 +43,9 @@ Each video is three files, named by its id `<subject>_<sequence>_<layout>_<view>
 
 - **`<id>_reference.csv.gz`** — one row per detection: `stream`, `frame`, `x`, `y`. The stream
   `MultiBlobDetector` is the Blob Detection reference against which deviations are measured;
-  `WeightedEdgesExtractor` is the Point Center Weighted Extractor (PCWE) used to check it.
+  `WeightedEdgesExtractor` is the Point Center Weighted Extractor (PCWE) used to check it; it is
+  included for the videos on which the two are compared, the glued markers and
+  `S6_emotions_4_front` (drawn markers).
   Detections are not assigned to markers; frames without detections have no rows.
 
 Coordinates are pixels in the 1080 × 1920 (portrait) frame, origin at the top-left corner, x to
@@ -58,7 +61,7 @@ marker-frame:
 | `stratum` | `start` (a frame near the start of the sequence), `peak` (the frame of the marker's largest displacement) or `disagreement` (a marker-frame in which Blob Detection and PCWE differ by more than 2 px or only one located the marker; not representative). |
 | `layout`, `view` | 4- or 40-marker layout, camera view. |
 | `annotator_1_x`, `annotator_1_y`, `annotator_2_x`, `annotator_2_y` | The two annotators' centres; empty when the annotator marked the marker as not visible. |
-| `blob_x`, `blob_y`, `pcwe_x`, `pcwe_y` | The Blob Detection reference and PCWE positions of that marker in that frame; empty when the stream has none. |
+| `blob_x`, `blob_y` | The Blob Detection reference position of that marker in that frame; empty when the reference has none. |
 
 Patches repeated to measure each annotator's repeatability are not included; the repeatability is
 reported in the article.

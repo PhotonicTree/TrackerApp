@@ -119,7 +119,8 @@ python3 subject_statistics.py front_trajectories.csv              # Section 5.2:
 python3 analyse_tracking.py --results $D/sweep/s1.5/*.json        # Table 5, once per scale s1.5 ... s3.0
 python3 compare_hybrid.py "$D/dense/*.json"                       # final retention, mis-assignment (Table 7)
 python3 analyse_tracking.py --results $D/dense/*.json             # Table 7: deviations, pooled table
-python3 validate_reference.py --results $D/glued/*.json           # Section 5.1; also sparse/ and dense/
+python3 validate_reference.py --results $D/glued/*.json           # Section 5.1: Blob Detection vs PCWE, glued
+python3 validate_reference.py --results $D/sparse/S6_emotions_4_front.json   # ... and drawn markers
 python3 analyse_annotations.py --points $D/annotation_points.csv --data $D   # Section 5.1: manual annotation
 ```
 

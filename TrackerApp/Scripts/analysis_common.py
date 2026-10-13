@@ -153,9 +153,10 @@ def load_exported_video(path, header):
                             for i in range(frames)}
 
     targets = defaultdict(lambda: defaultdict(dict))
-    with gzip.open(base + "_trackers.csv.gz", "rt", encoding="utf-8", newline="") as handle:
-        for row in csv.DictReader(handle):
-            targets[row["tracker"]][int(row["frame"])][int(row["marker"])] = row
+    if os.path.exists(base + "_trackers.csv.gz"):          # recordings without trackers have none
+        with gzip.open(base + "_trackers.csv.gz", "rt", encoding="utf-8", newline="") as handle:
+            for row in csv.DictReader(handle):
+                targets[row["tracker"]][int(row["frame"])][int(row["marker"])] = row
     for tracker, per_frame in targets.items():
         section, valid, switches = {}, {}, {}
         for frame in sorted(per_frame):

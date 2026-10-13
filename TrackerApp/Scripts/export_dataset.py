@@ -7,7 +7,7 @@ video id such as S3_visemes_40_front:
 
   <id>.json               metadata and the initial boxes
   <id>_trackers.csv.gz    one row per tracker, frame and marker: tracker, frame, marker, cx, cy,
-                          w, h, valid, fallback
+                          w, h, valid, fallback (not written for recordings without trackers)
   <id>_reference.csv.gz   one row per detection: stream (MultiBlobDetector = Blob Detection,
                           WeightedEdgesExtractor = PCWE), frame, x, y
 
@@ -30,12 +30,16 @@ import gzip
 import json
 import os
 import re
-import shutil
 import statistics
 import sys
 
 from analysis_common import (EXPORT_FORMAT, REFERENCE_SECTIONS, VIEWS, frame_keys, load_subject_codes,
                              subject_of)
+
+# The PCWE stream checks Blob Detection; it is exported for the recordings on which the two are
+# compared in the article: the glued markers and one frontal 4-marker sequence of drawn markers.
+PCWE_STREAM = "WeightedEdgesExtractor"
+PCWE_DRAWN = {("sparse", "S6_emotions_4_front")}
 
 CHUNK = re.compile(r"\(([^)]*)\)")
 
@@ -98,7 +102,8 @@ def export_one(condition, scale, path, out_dir, codes):
     rois = document.get("_rois", {})
     diagnostics = document.get("_diagnostics", {})
     trackers = [k for k in document if not k.startswith("_") and k not in REFERENCE_SECTIONS]
-    references = [k for k in REFERENCE_SECTIONS if k in document]
+    references = [k for k in REFERENCE_SECTIONS if k in document
+                  and (k != PCWE_STREAM or condition == "glued" or (condition, video_id) in PCWE_DRAWN)]
     ratios = [r["w"] / r["d"] for r in rois.values() if r.get("d")]
 
     header = {
@@ -129,21 +134,22 @@ def export_one(condition, scale, path, out_dir, codes):
         json.dump(header, handle, indent=1)
 
     rows = 0
-    with gzip.open(os.path.join(target_dir, video_id + "_trackers.csv.gz"), "wt",
-                   encoding="utf-8", newline="", compresslevel=9) as handle:
-        writer = csv.writer(handle)
-        writer.writerow(["tracker", "frame", "marker", "cx", "cy", "w", "h", "valid", "fallback"])
-        for tracker in trackers:
-            valid = diagnostics.get(tracker, {}).get("valid", {})
-            switches = diagnostics.get(tracker, {}).get("fallback_switches", {})
-            for key in frame_keys(document[tracker]):
-                flags = valid.get(key, [])
-                fallbacks = switches.get(key)
-                for marker, (cx, cy, w, h) in enumerate(chunks(document[tracker][key])):
-                    ok = flags[marker] if marker < len(flags) else True
-                    fallback = "" if fallbacks is None else int(bool(fallbacks[marker]))
-                    writer.writerow([tracker, int(key), marker, cx, cy, w, h, int(bool(ok)), fallback])
-                    rows += 1
+    if trackers:
+        with gzip.open(os.path.join(target_dir, video_id + "_trackers.csv.gz"), "wt",
+                       encoding="utf-8", newline="", compresslevel=9) as handle:
+            writer = csv.writer(handle)
+            writer.writerow(["tracker", "frame", "marker", "cx", "cy", "w", "h", "valid", "fallback"])
+            for tracker in trackers:
+                valid = diagnostics.get(tracker, {}).get("valid", {})
+                switches = diagnostics.get(tracker, {}).get("fallback_switches", {})
+                for key in frame_keys(document[tracker]):
+                    flags = valid.get(key, [])
+                    fallbacks = switches.get(key)
+                    for marker, (cx, cy, w, h) in enumerate(chunks(document[tracker][key])):
+                        ok = flags[marker] if marker < len(flags) else True
+                        fallback = "" if fallbacks is None else int(bool(fallbacks[marker]))
+                        writer.writerow([tracker, int(key), marker, cx, cy, w, h, int(bool(ok)), fallback])
+                        rows += 1
     with gzip.open(os.path.join(target_dir, video_id + "_reference.csv.gz"), "wt",
                    encoding="utf-8", newline="", compresslevel=9) as handle:
         writer = csv.writer(handle)
@@ -211,8 +217,15 @@ def main():
     annotations = args.annotations or os.path.join(os.path.dirname(os.path.abspath(args.results)),
                                                    "annotation", "annotation_points.csv")
     if os.path.exists(annotations):
-        # Coded video ids and anonymous annotator columns only; checked with everything else below.
-        shutil.copyfile(annotations, os.path.join(args.out, "annotation_points.csv"))
+        # Coded video ids, anonymous annotator columns and the reference position; checked with
+        # everything else below.
+        with open(annotations, newline="", encoding="utf-8") as source:
+            reader = csv.DictReader(source)
+            fields = [f for f in reader.fieldnames if not f.startswith("pcwe_")]
+            with open(os.path.join(args.out, "annotation_points.csv"), "w", newline="", encoding="utf-8") as target:
+                writer = csv.DictWriter(target, fieldnames=fields, extrasaction="ignore")
+                writer.writeheader()
+                writer.writerows(reader)
         print(f"manual annotations: {annotations}")
     elif args.annotations:
         raise SystemExit(f"No annotations at {args.annotations}.")

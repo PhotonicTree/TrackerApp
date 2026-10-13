@@ -1,12 +1,104 @@
-TrackerApp/x64/
-x64/
+# ---- Visual Studio / MSBuild ----
 .vs/
-TrackerApp/build
-*.png
+# e.g. TrackerApp.vcxproj.user (machine-specific).
+# Note: .gitignore has no trailing comments, so this must sit on its own line.
+*.user
+*.suo
+*.sdf
+*.opensdf
+*.VC.db
+*.VC.opendb
+*.aps
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+[Xx]64/
+[Ww]in32/
+[Aa][Rr][Mm]64/
+
+# ---- CMake ----
+build/
+build-linux/
+out/
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+CMakeUserPresets.json
+CTestTestfile.cmake
+cmake_install.cmake
+install_manifest.txt
+_deps/
+Testing/
+compile_commands.json
+
+# ---- Qt generated ----
+*.pro.user
+*.pro.user.*
+*.qmlc
+*.jsc
+.qmake.stash
+.qmake.cache
+moc_*.cpp
+moc_*.h
+moc_predefs.h
+qrc_*.cpp
+ui_*.h
+*_autogen/
+
+# ---- Compiled / linker output ----
+*.o
+*.obj
+*.exe
+*.dll
+*.lib
+*.a
+*.so
+*.dylib
+*.pdb
+*.ilk
+*.exp
+*.idb
+
+# ---- Editors / IDE ----
+.vscode/
+.idea/
+*.swp
+*~
+
+# ---- OS cruft ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Project data / artifacts (large, not source) ----
+# Labels/ holds the box files; its folder names identify participants.
+TrackerApp/Recordings/
+TrackerApp/Results/
+TrackerApp/Labels/
+Results/
+Labels/
 *.onnx
 *.caffemodel
 *.prototxt
-TrackerApp/.vscode
-TrackerApp/Results
+*.pb
+*.mp4
+*.avi
 *.log
 *.csv
+*.png
+# The exported dataset is meant to be committed.
+!data/*.csv
+
+# ---- Stray backup copies ----
+*[ _]copy.*
+*[ _]copy
+* copy*
+
+# ---- Python ----
+__pycache__/
+*.pyc
+
+# ---- Private / generated analysis files ----
+# subject_codes.json maps recording names to subject codes and must stay private.
+TrackerApp/Scripts/*.json

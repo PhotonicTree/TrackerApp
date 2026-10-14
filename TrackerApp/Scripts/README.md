@@ -11,7 +11,7 @@ Python 3 and its standard library only, except where noted.
 | `aggregate_subjects.py` | Per-trajectory and per-subject aggregation, bootstrap intervals over subjects. |
 | `compare_hybrid.py` | Retention, retention area, mis-assignment and deviation per tracker, averaged per subject; the hybrid against its components. |
 | `validate_reference.py` | Agreement between the Blob Detection and PCWE reference streams, all markers, every frame. |
-| `show_reference.py` | Visual check of the reference: the reference alone on white beside the same points on the recording (needs `opencv-python`). |
+| `show_reference.py` | Visual check of the reference: the reference alone on white, beside the same points on the recording when it is available (needs `opencv-python`). |
 | `annotation_kit.py` | Builds the manual-annotation kit: a stratified sample of marker-frames, cut as anonymous patches into one offline page (`annotate_template.html`), plus a manifest linking each patch to its recording (needs `opencv-python`). |
 | `analyse_annotations.py` | Manual centres against Blob Detection, PCWE and the trackers; inter-annotator agreement and repeatability. |
 | `analysis_common.py` | Shared parsing, tracker-independent reference construction, exact assignment, subject codes. |
@@ -108,8 +108,9 @@ python3 show_reference.py --results $R/sparse/<video>.json --snapshot 150       
 Left: the reference alone on white (coloured dot = marker n, grey = detection not assigned to any
 marker, red `n?` = no reference for marker n in that frame). Right: the same on the recording. The
 reference is built by the same code as in the analysis. The recording path is read from the results
-file; pass `--video` when it has moved or when reading the exported dataset, which stores no paths.
-The output contains images of the recordings.
+file; pass `--video` when it has moved. Without a recording, as for the exported dataset, which
+stores no paths, only the left panel is drawn, with any tracker boxes on it. With a recording, the
+output contains images of it.
 
 ## Validating the reference by manual annotation
 

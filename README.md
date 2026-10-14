@@ -99,6 +99,27 @@ centre in the same proportion.
 Boxes are labelled in an OpenCV window opened by both programs, pre-filled with the markers Blob
 Detection finds on frame 0; press `h` in the window for its keys.
 
+## Displaying the reference points
+
+`show_reference.py` draws the Blob Detection reference of one video, frame by frame, on a light
+background: the reference position of each marker as a numbered coloured dot with a short trail,
+detections not assigned to any marker as grey dots, and a red `n?` where marker n has no reference
+in that frame. It runs on the published data (download in the next section) and needs OpenCV for
+Python (`pip install opencv-python`):
+
+```bash
+cd TrackerApp/Scripts
+D=../../TrackerApp-data                        # where the archive was unpacked
+
+python3 show_reference.py --results $D/sparse/S1_emotions_4_front.json --show           # interactive
+python3 show_reference.py --results $D/sparse/S1_emotions_4_front.json --snapshot 150   # one frame as PNG
+python3 show_reference.py --results $D/dense/S1_emotions_40_front.json                  # whole video as MP4
+```
+
+`--trackers CSRT,ViT` adds the boxes of those trackers and `--pcwe` the PCWE detections (glued
+videos and `S6_emotions_4_front`). In the window, space plays and pauses, `a` and `d` step back and
+forward, `s` saves the frame and `q` quits.
+
 ## Reproducing the published results
 
 The data of the article are attached to the

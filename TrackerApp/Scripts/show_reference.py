@@ -8,6 +8,8 @@ reference position of that marker, with a short trail of its previous positions;
 Blob Detection detections not assigned to any marker; a red "n?" marks marker n when it has no
 reference in that frame, drawn at its last known position. Right panel: the same on the recording,
 with every raw detection as a small white cross. The face region the detector searched is outlined.
+Without the recording (the published dataset has none), only the left panel is drawn, with the
+tracker boxes on it; frame count, frame rate and frame size are then read from the results file.
 
 The reference is built exactly as the analysis builds it (analysis_common.build_reference_tracks:
 seeded from the labelled marker centres, each marker following its own previous position), so what
@@ -20,7 +22,8 @@ Modes (default: write a video next to the results file, *_reference.mp4):
   --out FILE      output path for the video or snapshot
 
 Options:
-  --video         the recording (default: the path stored in the results file)
+  --video         the recording (default: the path stored in the results file; without one, the
+                  reference alone is drawn)
   --trackers      also draw these trackers' boxes on the recording, e.g. CSRT,ViT
   --pcwe          also draw the PCWE detections (blue)
   --full-frame    show the whole frame instead of the searched face region
@@ -60,6 +63,18 @@ def label(img, s, org, colour, background, scale=0.45):
     x, y = org
     cv2.rectangle(img, (x - 1, y - h - 2), (x + w + 1, y + baseline), background, -1)
     cv2.putText(img, s, (x, y), cv2.FONT_HERSHEY_SIMPLEX, scale, colour, 1, cv2.LINE_AA)
+
+
+def wrap(text, width, scale):
+    """Splits a header line at its separators so that every piece fits the given pixel width."""
+    lines, current = [], ""
+    for piece in text.replace("   ", "\0").replace(", ", ",\0").split("\0"):
+        candidate = current + (" " if current.endswith(",") else "   ") + piece if current else piece
+        if current and cv2.getTextSize(candidate, cv2.FONT_HERSHEY_SIMPLEX, scale, 1)[0][0] > width:
+            lines.append(current.rstrip(","))
+            candidate = piece
+        current = candidate
+    return lines + [current]
 
 
 class Reference:
@@ -109,11 +124,15 @@ def view_window(document, frame_size, full_frame, pad=30):
 
 
 def render(ref, i, frame, window, height, trail_length, region):
+    """One frame: the reference on white beside the recording, or on white alone if frame is None."""
     x0, y0, x1, y1 = window
     scale = height / (y1 - y0)
     width = int(round((x1 - x0) * scale))
-    right = cv2.resize(frame[y0:y1, x0:x1], (width, height), interpolation=cv2.INTER_AREA)
-    left = np.full_like(right, 255)
+    left = np.full((height, width, 3), 255, np.uint8)
+    right = None if frame is None else cv2.resize(frame[y0:y1, x0:x1], (width, height),
+                                                  interpolation=cv2.INTER_AREA)
+    panels = [(left, -1, (255, 255, 255))] + ([(right, 2, (30, 30, 30))] if right is not None else [])
+    boxes = left if right is None else right
 
     def to(p):
         return int(round((p[0] - x0) * scale)), int(round((p[1] - y0) * scale))
@@ -121,7 +140,7 @@ def render(ref, i, frame, window, height, trail_length, region):
     key = f"{i:04d}"
     if region:
         x, y, w, h = region
-        for panel in (left, right):
+        for panel, _, _ in panels:
             cv2.rectangle(panel, to((x, y)), to((x + w, y + h)), (170, 170, 170), 1)
 
     reference = ref.at(i)
@@ -129,15 +148,16 @@ def render(ref, i, frame, window, height, trail_length, region):
     for p in ref.detections.get(key, []):
         if tuple(p) not in assigned:
             cv2.circle(left, to(p), 3, (160, 160, 160), -1, cv2.LINE_AA)
-        cv2.drawMarker(right, to(p), (255, 255, 255), cv2.MARKER_CROSS, 7, 1)
+        if right is not None:
+            cv2.drawMarker(right, to(p), (255, 255, 255), cv2.MARKER_CROSS, 7, 1)
     for p in ref.pcwe.get(key, []):
-        for panel in (left, right):
+        for panel, _, _ in panels:
             cv2.circle(panel, to(p), 2, (255, 110, 0), -1, cv2.LINE_AA)
     for t, section in enumerate(ref.trackers):
         for box in parse_points(ref.document[section].get(key, "")):
             if len(box) >= 4:
                 cx, cy, w, h = box[:4]
-                cv2.rectangle(right, to((cx - w / 2, cy - h / 2)), to((cx + w / 2, cy + h / 2)),
+                cv2.rectangle(boxes, to((cx - w / 2, cy - h / 2)), to((cx + w / 2, cy + h / 2)),
                               TRACKER_COLOURS[t % len(TRACKER_COLOURS)][0], 1, cv2.LINE_AA)
 
     found = 0
@@ -146,27 +166,34 @@ def render(ref, i, frame, window, height, trail_length, region):
         if p:
             found += 1
             points = np.array([to(q) for q in ref.trail(m, i, trail_length)], np.int32)
-            for panel, fill, background in ((left, -1, (255, 255, 255)), (right, 2, (30, 30, 30))):
+            for panel, fill, background in panels:
                 if len(points) > 1:
                     cv2.polylines(panel, [points], False, ref.colours[m], 1, cv2.LINE_AA)
                 cv2.circle(panel, to(p), radius, ref.colours[m], fill, cv2.LINE_AA)
                 label(panel, str(m), (to(p)[0] + radius + 3, to(p)[1] - radius), ref.colours[m], background)
         else:
             q = ref.last_known.get(key, ref.seeds)[m]
-            for panel, background in ((left, (255, 255, 255)), (right, (30, 30, 30))):
+            for panel, _, background in panels:
                 cv2.circle(panel, to(q), radius, MISSING, 1, cv2.LINE_AA)
                 label(panel, f"{m}?", (to(q)[0] + radius + 3, to(q)[1] - radius), MISSING, background)
 
-    bar = np.full((52, 2 * width + 6, 3), 245, np.uint8)
+    bar_width = width if right is None else 2 * width + 6
     status = (f"frame {i}   detections {len(ref.detections.get(key, []))}   "
               f"markers with reference {found}/{len(ref.seeds)}")
     if ref.trackers:
         status += "   boxes: " + ", ".join(f"{s} ({TRACKER_COLOURS[t % len(TRACKER_COLOURS)][1]})"
                                          for t, s in enumerate(ref.trackers))
-    legend = ("left: reference only (coloured = marker n, grey = unassigned detection, red n? = no reference)   "
-              "right: on the recording (white + = raw detection)" + ("   blue = PCWE" if ref.pcwe else ""))
-    label(bar, status, (8, 20), (30, 30, 30), (245, 245, 245), 0.5)
-    label(bar, legend, (8, 42), (90, 90, 90), (245, 245, 245), 0.42)
+    legend = "coloured = marker n, grey = unassigned detection, red n? = no reference"
+    if right is not None:
+        legend = f"left: reference only ({legend})   right: on the recording (white + = raw detection)"
+    legend += "   blue = PCWE" if ref.pcwe else ""
+    lines = [(line, (30, 30, 30), 0.5) for line in wrap(status, bar_width - 16, 0.5)]
+    lines += [(line, (90, 90, 90), 0.42) for line in wrap(legend, bar_width - 16, 0.42)]
+    bar = np.full((10 + 21 * len(lines), bar_width, 3), 245, np.uint8)
+    for n, (line, colour, size) in enumerate(lines):
+        label(bar, line, (8, 20 + 21 * n), colour, (245, 245, 245), size)
+    if right is None:
+        return np.vstack([bar, left])
     return np.vstack([bar, np.hstack([left, np.full((height, 6, 3), 90, np.uint8), right])])
 
 
@@ -176,9 +203,12 @@ def show(ref, capture, window, args, region, frames_total, fps, out_stem):
     i, playing, position, frame, sized, seen_visible = args.start, False, None, None, False, False
     while True:
         if position != i:
-            if position is None or i != position + 1:
-                capture.set(cv2.CAP_PROP_POS_FRAMES, i)
-            ok, frame = capture.read()
+            if capture is None:
+                ok, frame = i < frames_total, None
+            else:
+                if position is None or i != position + 1:
+                    capture.set(cv2.CAP_PROP_POS_FRAMES, i)
+                ok, frame = capture.read()
             if not ok:
                 if i == 0:
                     raise SystemExit("The recording could not be read.")
@@ -232,15 +262,23 @@ def main():
     args = parser.parse_args()
 
     document = load_results(args.results)
-    video = args.video or document.get("_meta", {}).get("sequence")
-    if not video or not os.path.exists(video):
-        raise SystemExit(f"Recording not found: {video!r}; pass --video.")
+    meta = document.get("_meta", {})
+    if args.video and not os.path.exists(args.video):
+        raise SystemExit(f"Recording not found: {args.video!r}.")
+    video = args.video or meta.get("sequence")
     ref = Reference(document, args.max_jump, args.pcwe, [t.strip() for t in args.trackers.split(",") if t.strip()])
 
-    capture = cv2.VideoCapture(video)
-    frames_total = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
-    fps = capture.get(cv2.CAP_PROP_FPS) or 30.0
-    frame_size = (int(capture.get(cv2.CAP_PROP_FRAME_WIDTH)), int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+    if video and os.path.exists(video):
+        capture = cv2.VideoCapture(video)
+        frames_total = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
+        fps = capture.get(cv2.CAP_PROP_FPS) or 30.0
+        frame_size = (int(capture.get(cv2.CAP_PROP_FRAME_WIDTH)), int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+    else:
+        print("No recording: drawing the reference alone.")
+        capture = None
+        frames_total = int(meta.get("frames") or len(ref.detections))
+        fps = float(meta.get("video_fps") or 60.0)
+        frame_size = tuple(meta.get("frame_size") or (1080, 1920))
     window = view_window(document, frame_size, args.full_frame)
     region = document.get("_meta", {}).get("reference_detector", {}).get("MultiBlobDetector", {}).get("region")
     out_stem = os.path.splitext(args.out or args.results)[0]
@@ -251,8 +289,11 @@ def main():
         return
 
     if args.snapshot is not None:
-        capture.set(cv2.CAP_PROP_POS_FRAMES, args.snapshot)
-        ok, frame = capture.read()
+        if capture is None:
+            ok, frame = 0 <= args.snapshot < frames_total, None
+        else:
+            capture.set(cv2.CAP_PROP_POS_FRAMES, args.snapshot)
+            ok, frame = capture.read()
         if not ok:
             raise SystemExit(f"Frame {args.snapshot} could not be read.")
         path = args.out or f"{out_stem}_reference_{args.snapshot:04d}.png"
@@ -261,11 +302,12 @@ def main():
         return
 
     end = min(frames_total, args.end if args.end is not None else frames_total)
-    capture.set(cv2.CAP_PROP_POS_FRAMES, args.start)
+    if capture is not None:
+        capture.set(cv2.CAP_PROP_POS_FRAMES, args.start)
     path = args.out or f"{out_stem}_reference.mp4"
     writer = None
     for i in range(args.start, end):
-        ok, frame = capture.read()
+        ok, frame = capture.read() if capture is not None else (True, None)
         if not ok:
             break
         canvas = render(ref, i, frame, window, args.height, args.trail, region)
